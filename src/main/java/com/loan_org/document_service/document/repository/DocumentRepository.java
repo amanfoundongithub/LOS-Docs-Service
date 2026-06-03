@@ -8,10 +8,5 @@ import java.util.List;
 
 @Repository
 public interface DocumentRepository extends MongoRepository<DocumentMetadata, String> {
-
-    /**
-     * Finds all documents associated with a specific loan application.
-     * Leverages the database index we designed earlier.
-     */
     List<DocumentMetadata> findByApplicationId(String applicationId);
 }
