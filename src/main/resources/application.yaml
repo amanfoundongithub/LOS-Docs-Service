@@ -1,3 +1,21 @@
 spring:
   application:
     name: document_service
+
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: document_service
+      auto-index-creation: true
+
+server:
+  port: 5800
+
+aws:
+  region: us-east-1
+  access-key: minioadmin
+  secret-key: minioadmin
+  s3:
+    bucket-name: loan-documents-prod-bucket
+    endpoint: http://localhost:9000
