@@ -36,6 +36,5 @@ public class DocumentMetadata {
     private Instant updatedAt;
 
     @Version
-    @Builder.Default
-    private Long version = 0L;
+    private Long version;
 }
