@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -15,8 +16,8 @@ import java.util.Map;
 @Component
 public class SimpleSecurityInterceptor implements HandlerInterceptor {
 
-    // IMPORTANT: For modern HMAC-SHA algorithms, this string MUST be at least 32 bytes (256 bits) long.
-    private final String SIGNING_KEY = "zZFvO6Mb9unL62IIhtfzJfoP6FSoLZ1FtmaPqFblGzr";
+    @Value("${jwt.signing_key}")
+    private String signingKey;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -28,26 +29,19 @@ public class SimpleSecurityInterceptor implements HandlerInterceptor {
         }
 
         try {
-            String token = authHeader.substring(7);
+            String token  = authHeader.substring(7);
+            SecretKey key = Keys.hmacShaKeyFor(signingKey.getBytes(StandardCharsets.UTF_8));
 
-            // 1. Convert the plain text string key safely into a SecretKey object
-            SecretKey key = Keys.hmacShaKeyFor(SIGNING_KEY.getBytes(StandardCharsets.UTF_8));
-
-            // 2. Parse using the new immutable builder pipeline
             Claims claims = Jwts.parser()
-                    .verifyWith(key)             // Replaces setSigningKey(String)
-                    .build()                     // Compiles the parser instance
-                    .parseSignedClaims(token)    // Replaces parseClaimsJws(String)
-                    .getPayload();               // Replaces getBody()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
 
-            // Attach claims to request attributes for the controller layer
             request.setAttribute("userId", claims.getSubject());
-
-            // Get attributes
             Map attributes = claims.get("attributes", Map.class);
             request.setAttribute("userRole", attributes.get("user_role"));
             request.setAttribute("canUpload", attributes.get("document:upload"));
-
             return true;
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);

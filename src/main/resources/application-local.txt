@@ -1,0 +1,13 @@
+
+# MinIO related secrets
+MINIO_USERNAME:
+MINIO_PASSWORD:
+MINIO_SECRET_TOKEN:
+
+# AWS naming configurations
+S3_BUCKET_ENDPOINT: http://localhost:9000
+S3_BUCKET_NAME: documents
+S3_BUCKET_REGION: us-east-1
+
+# JWT related configuration (get the same as IAM service)
+JWT_SIGNING_KEY:
