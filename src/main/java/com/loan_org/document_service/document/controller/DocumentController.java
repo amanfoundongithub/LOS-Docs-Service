@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -22,10 +23,18 @@ public class DocumentController {
     private final DocumentService documentService;
 
     @PostMapping("/upload-url")
-    public ResponseEntity<DocumentResponse> initializeUpload(@Valid @RequestBody UploadRequest request) {
-        log.info("Received request to initialize upload for loan application: {}", request.getApplicationId());
-        DocumentResponse response = documentService.initializeUpload(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<DocumentResponse> initializeUpload(@Valid @RequestBody UploadRequest request,
+                                                             @RequestAttribute("userRole") String userRole,
+                                                             @RequestAttribute("userId") String userId,
+                                                             @RequestAttribute("canUpload") boolean canUpload) {
+        if (!canUpload) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized action");
+        }
+
+        if ("APPLICANT".equals(userRole) && !userId.equals(request.getApplicationId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
+        }
+        return ResponseEntity.ok(documentService.initializeUpload(request));
     }
 
     @PostMapping("/{id}/confirm")
