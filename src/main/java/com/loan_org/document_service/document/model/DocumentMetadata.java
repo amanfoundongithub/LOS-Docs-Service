@@ -11,30 +11,40 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
+/**
+ * Defines a MongoDB document pertaining to the metadata of an uploaded document. Useful
+ * for keeping track of the document's life as well as the metadata associated with the
+ * document.
+ *
+ * @author amanfoundongithub
+ * @version 1.0.0
+ */
 @Data
 @Builder
 @Document(collection = "documents")
 public class DocumentMetadata {
 
     @Id
-    private String id;
+    private String id;             // ID associated with MongoDB
 
     @Indexed
-    private String applicationId;
-    private String documentType;
-    private String fileName;
-    private long fileSize;
-    private String storageKey;
+    private String applicationId;  // applicationId is required to tie the document with a specific application
+
+    private String documentType;   // Type of the document
+    private String fileName;       // Name of the document
+    private String contentType;    // Content type of the document (currently only application/pdf)
+    private long   fileSize;       // File size, to be determined for the document
+    private String storageKey;     // AWS storage key
 
     @Indexed
-    private DocumentStatus status;
+    private DocumentStatus status; // Status of the document in the application
 
     @CreatedDate
-    private Instant createdAt;
+    private Instant createdAt;     // Audit purpose, stores created timestamp
 
     @LastModifiedDate
-    private Instant updatedAt;
+    private Instant updatedAt;     // Store last updated timestamp
 
     @Version
-    private Long version;
+    private Long version;          // Concurrency protection for database write
 }
