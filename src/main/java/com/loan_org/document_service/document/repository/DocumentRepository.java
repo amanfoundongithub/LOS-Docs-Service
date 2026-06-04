@@ -6,6 +6,12 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Defines a MongoDB interface to interact with the Document repository.
+ *
+ * @author amanfoundongithub
+ * @version 1.0.0
+ */
 @Repository
 public interface DocumentRepository extends MongoRepository<DocumentMetadata, String> {
     List<DocumentMetadata> findByApplicationId(String applicationId);
