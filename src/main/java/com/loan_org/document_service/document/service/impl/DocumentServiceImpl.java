@@ -9,7 +9,7 @@ import com.loan_org.document_service.document.model.DocumentStatus;
 import com.loan_org.document_service.document.port.DocumentRepository;
 import com.loan_org.document_service.document.service.DocumentService;
 import com.loan_org.document_service.exception.classes.DocumentNotFoundException;
-import com.loan_org.document_service.infrastructure.storage.FileStorageNamingHelper;
+import com.loan_org.document_service.document.port.StorageKeyResolver;
 import com.loan_org.document_service.infrastructure.storage.StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ public class DocumentServiceImpl implements DocumentService {
     // Services to inject for help
     private final DocumentRepository      documentRepository;
     private final StorageService          storageService;
-    private final FileStorageNamingHelper namingHelper;
+    private final StorageKeyResolver namingHelper;
     private final DocumentObjectMapper    documentObjectMapper;
 
     @Override
