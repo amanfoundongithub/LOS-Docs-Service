@@ -1,9 +1,10 @@
-package com.loan_org.document_service.document.controller;
+package com.loan_org.document_service.infrastructure.web.controller;
 
 import com.loan_org.document_service.document.dto.DocumentResponse;
 import com.loan_org.document_service.document.dto.DocumentUploadResponse;
-import com.loan_org.document_service.document.dto.UploadRequest;
+import com.loan_org.document_service.infrastructure.web.dto.UploadRequest;
 import com.loan_org.document_service.document.service.DocumentService;
+import com.loan_org.document_service.infrastructure.web.mapper.DocumentObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,8 @@ import java.util.Map;
 public class DocumentController {
 
     // Inject the service
-    private final DocumentService documentService;
+    private final DocumentService      documentService;
+    private final DocumentObjectMapper documentMapper;
 
     @PostMapping("/upload")
     public ResponseEntity<DocumentUploadResponse> initializeUpload(@Valid @RequestBody UploadRequest request,
@@ -36,7 +38,8 @@ public class DocumentController {
         if ("APPLICANT".equals(userRole) && !userId.equals(request.getApplicationId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
         }
-        return ResponseEntity.ok(documentService.initializeUpload(request));
+
+        return ResponseEntity.ok(documentService.initializeUpload(documentMapper.toCommand(request)));
     }
 
     @PostMapping("/{id}/confirm")

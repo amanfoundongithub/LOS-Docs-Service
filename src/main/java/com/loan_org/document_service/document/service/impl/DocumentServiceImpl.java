@@ -1,9 +1,8 @@
 package com.loan_org.document_service.document.service.impl;
 
 import com.loan_org.document_service.document.dto.DocumentUploadResponse;
-import com.loan_org.document_service.document.dto.UploadRequest;
+import com.loan_org.document_service.document.dto.UploadDocumentCommand;
 import com.loan_org.document_service.document.dto.DocumentResponse;
-import com.loan_org.document_service.document.mapper.DocumentObjectMapper;
 import com.loan_org.document_service.document.model.DocumentMetadata;
 import com.loan_org.document_service.document.model.DocumentStatus;
 import com.loan_org.document_service.document.port.DocumentRepository;
@@ -32,16 +31,15 @@ public class DocumentServiceImpl implements DocumentService {
     // Services to inject for help
     private final DocumentRepository      documentRepository;
     private final StorageService          storageService;
-    private final StorageKeyResolver namingHelper;
-    private final DocumentObjectMapper    documentObjectMapper;
+    private final StorageKeyResolver      namingHelper;
 
     @Override
     @Transactional
-    public DocumentUploadResponse initializeUpload(UploadRequest request) {
+    public DocumentUploadResponse initializeUpload(UploadDocumentCommand request) {
 
         // Log the request received acknowledgment
         log.info("[DOCUMENT_SERVICE][START] Received request to upload document {} for applicationId: {}. Starting upload now...",
-                request.getFileName(), request.getApplicationId());
+                request.fileName(), request.applicationId());
 
         // Generate a storage key for AWS
         String storageKey = namingHelper.createStorageKey(request);
@@ -57,15 +55,27 @@ public class DocumentServiceImpl implements DocumentService {
                 validityInMinutes);
 
         // Unpack the request, as a metadata and persist it
-        DocumentMetadata metadata = documentObjectMapper.mapToDocumentMetaData(request, storageKey);
+        DocumentMetadata metadata = DocumentMetadata.builder()
+                .applicationId(request.applicationId())
+                .documentType(request.documentType())
+                .fileName(request.fileName())
+                .fileSize(request.fileSize())
+                .storageKey(storageKey)
+                .status(DocumentStatus.PENDING)
+                .build();
         DocumentMetadata savedMetadata = documentRepository.save(metadata);
 
         log.info("[DOCUMENT_SERVICE][START] Successfully persisted the data for the document with generated MongoID: {}. Sending URL to user for uploading...",
                 savedMetadata.getId());
 
         // Return the object back to the user
-        return documentObjectMapper.mapToDocumentUploadResponse(savedMetadata, presignedUrl);
-
+        return DocumentUploadResponse.builder()
+                .id(metadata.getId())
+                .status(metadata.getStatus())
+                .fileName(metadata.getFileName())
+                .uploadUrl(presignedUrl)
+                .fileType(metadata.getContentType())
+                .build();
     }
 
     @Override

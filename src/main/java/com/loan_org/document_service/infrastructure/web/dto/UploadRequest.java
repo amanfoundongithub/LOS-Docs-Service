@@ -1,4 +1,4 @@
-package com.loan_org.document_service.document.dto;
+package com.loan_org.document_service.infrastructure.web.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

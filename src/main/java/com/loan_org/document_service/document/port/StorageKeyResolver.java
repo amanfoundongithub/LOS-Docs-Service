@@ -1,6 +1,6 @@
 package com.loan_org.document_service.document.port;
 
-import com.loan_org.document_service.document.dto.UploadRequest;
+import com.loan_org.document_service.document.dto.UploadDocumentCommand;
 
 /**
  * Defines a port service saying that we have a method to determine the AWS key
@@ -20,6 +20,6 @@ public interface StorageKeyResolver {
      * @param uploadRequest The request for upload
      * @return The string containing the string
      */
-    String createStorageKey(UploadRequest uploadRequest);
+    String createStorageKey(UploadDocumentCommand uploadRequest);
 
 }
