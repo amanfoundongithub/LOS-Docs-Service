@@ -6,7 +6,7 @@ import com.loan_org.document_service.document.dto.DocumentResponse;
 import com.loan_org.document_service.document.mapper.DocumentObjectMapper;
 import com.loan_org.document_service.document.model.DocumentMetadata;
 import com.loan_org.document_service.document.model.DocumentStatus;
-import com.loan_org.document_service.document.repository.DocumentRepository;
+import com.loan_org.document_service.document.port.DocumentRepository;
 import com.loan_org.document_service.document.service.DocumentService;
 import com.loan_org.document_service.exception.classes.DocumentNotFoundException;
 import com.loan_org.document_service.infrastructure.storage.FileStorageNamingHelper;
@@ -91,7 +91,6 @@ public class DocumentServiceImpl implements DocumentService {
         log.info("Document ID: {} successfully updated to status: UPLOADED", id);
 
         // TODO: In the next phases, we would emit a Kafka/RabbitMQ event right here!
-        // eventPublisher.publish(new DocumentUploadedEvent(updatedMetadata.getId()));
 
         return mapToResponse(updatedMetadata);
     }
