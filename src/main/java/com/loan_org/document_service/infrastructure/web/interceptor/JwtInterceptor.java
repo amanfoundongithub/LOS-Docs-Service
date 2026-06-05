@@ -1,4 +1,4 @@
-package com.loan_org.document_service.infrastructure.security;
+package com.loan_org.document_service.infrastructure.web.interceptor;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Component
-public class SimpleSecurityInterceptor implements HandlerInterceptor {
+public class JwtInterceptor implements HandlerInterceptor {
 
     @Value("${jwt.signing_key}")
     private String signingKey;
