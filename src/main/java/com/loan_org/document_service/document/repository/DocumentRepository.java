@@ -15,4 +15,5 @@ import java.util.List;
 @Repository
 public interface DocumentRepository extends MongoRepository<DocumentMetadata, String> {
     List<DocumentMetadata> findByApplicationId(String applicationId);
+    DocumentMetadata       findByStorageKey(String storageKey);
 }
