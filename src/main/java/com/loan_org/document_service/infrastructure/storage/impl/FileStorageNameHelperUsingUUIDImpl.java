@@ -1,13 +1,13 @@
 package com.loan_org.document_service.infrastructure.storage.impl;
 
 import com.loan_org.document_service.document.dto.UploadRequest;
-import com.loan_org.document_service.infrastructure.storage.FileStorageNamingHelper;
+import com.loan_org.document_service.document.port.StorageKeyResolver;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
-public class FileStorageNameHelperUsingUUIDImpl implements FileStorageNamingHelper {
+public class FileStorageNameHelperUsingUUIDImpl implements StorageKeyResolver {
 
     @Override
     public String createStorageKey(UploadRequest uploadRequest) {
