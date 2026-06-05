@@ -21,9 +21,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DocumentController {
 
+    // Inject the service
     private final DocumentService documentService;
 
-    @PostMapping("/upload-url")
+    @PostMapping("/upload")
     public ResponseEntity<DocumentUploadResponse> initializeUpload(@Valid @RequestBody UploadRequest request,
                                                                    @RequestAttribute("userRole") String userRole,
                                                                    @RequestAttribute("userId") String userId,
