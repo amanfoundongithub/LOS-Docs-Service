@@ -24,15 +24,6 @@ public class DocumentObjectMapperImpl implements DocumentObjectMapper {
     }
 
     @Override
-    public DocumentResponse mapToDocumentResponse(DocumentMetadata metadata, String presignedURL) {
-        return DocumentResponse.builder()
-                .fileName(metadata.getFileName())
-                .uploadUrl(presignedURL)
-                .createdAt(metadata.getCreatedAt())
-                .build();
-    }
-
-    @Override
     public DocumentUploadResponse mapToDocumentUploadResponse(DocumentMetadata metadata, String presignedURL) {
         return DocumentUploadResponse.builder()
                 .id(metadata.getId())
@@ -43,5 +34,13 @@ public class DocumentObjectMapperImpl implements DocumentObjectMapper {
                 .build();
     }
 
+    @Override
+    public DocumentResponse mapToDocumentResponse(DocumentMetadata metadata, String presignedURL) {
+        return DocumentResponse.builder()
+                .fileName(metadata.getFileName())
+                .uploadUrl(presignedURL)
+                .createdAt(metadata.getCreatedAt())
+                .build();
+    }
 
 }
