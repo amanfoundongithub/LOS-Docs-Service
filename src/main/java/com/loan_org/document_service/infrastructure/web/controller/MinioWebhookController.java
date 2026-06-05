@@ -1,4 +1,4 @@
-package com.loan_org.document_service.document.controller;
+package com.loan_org.document_service.infrastructure.web.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Value;
