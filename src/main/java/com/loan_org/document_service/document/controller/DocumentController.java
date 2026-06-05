@@ -1,6 +1,7 @@
 package com.loan_org.document_service.document.controller;
 
 import com.loan_org.document_service.document.dto.DocumentResponse;
+import com.loan_org.document_service.document.dto.DocumentUploadResponse;
 import com.loan_org.document_service.document.dto.UploadRequest;
 import com.loan_org.document_service.document.service.DocumentService;
 import jakarta.validation.Valid;
@@ -23,10 +24,10 @@ public class DocumentController {
     private final DocumentService documentService;
 
     @PostMapping("/upload-url")
-    public ResponseEntity<DocumentResponse> initializeUpload(@Valid @RequestBody UploadRequest request,
-                                                             @RequestAttribute("userRole") String userRole,
-                                                             @RequestAttribute("userId") String userId,
-                                                             @RequestAttribute("canUpload") boolean canUpload) {
+    public ResponseEntity<DocumentUploadResponse> initializeUpload(@Valid @RequestBody UploadRequest request,
+                                                                   @RequestAttribute("userRole") String userRole,
+                                                                   @RequestAttribute("userId") String userId,
+                                                                   @RequestAttribute("canUpload") boolean canUpload) {
         if (!canUpload) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized action");
         }

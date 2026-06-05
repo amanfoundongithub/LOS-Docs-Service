@@ -1,70 +1,71 @@
 package com.loan_org.document_service.document.service.impl;
 
+import com.loan_org.document_service.document.dto.DocumentUploadResponse;
 import com.loan_org.document_service.document.dto.UploadRequest;
 import com.loan_org.document_service.document.dto.DocumentResponse;
+import com.loan_org.document_service.document.mapper.DocumentObjectMapper;
 import com.loan_org.document_service.document.model.DocumentMetadata;
 import com.loan_org.document_service.document.model.DocumentStatus;
 import com.loan_org.document_service.document.repository.DocumentRepository;
 import com.loan_org.document_service.document.service.DocumentService;
 import com.loan_org.document_service.exception.classes.DocumentNotFoundException;
+import com.loan_org.document_service.infrastructure.storage.FileStorageNamingHelper;
 import com.loan_org.document_service.infrastructure.storage.StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor // Automatically constructor-injects fields marked 'final'
+@RequiredArgsConstructor
 public class DocumentServiceImpl implements DocumentService {
 
-    private final DocumentRepository documentRepository;
-    private final StorageService storageService;
+    // Inject the variables from yaml
+    @Value("${minio.upload.validity_in_minutes}")
+    private int validityInMinutes;
+
+    // Services to inject for help
+    private final DocumentRepository      documentRepository;
+    private final StorageService          storageService;
+    private final FileStorageNamingHelper namingHelper;
+    private final DocumentObjectMapper    documentObjectMapper;
 
     @Override
     @Transactional
-    public DocumentResponse initializeUpload(UploadRequest request) {
-        log.info("Initializing document upload for application: {}, type: {}",
-                request.getApplicationId(), request.getDocumentType());
+    public DocumentUploadResponse initializeUpload(UploadRequest request) {
 
-        // 1. Generate a predictable, clean storage path for the cloud bucket
-        String uniqueFileId = UUID.randomUUID().toString();
-        String storageKey = String.format("loans/%s/%s-%s",
-                request.getApplicationId(), uniqueFileId, request.getFileName());
+        // Log the request received acknowledgment
+        log.info("[DOCUMENT_SERVICE][START] Received request to upload document {} for applicationId: {}. Starting upload now...",
+                request.getFileName(), request.getApplicationId());
 
-        // 2. Request a secure upload link from our storage provider (valid for 15 minutes)
-        String presignedUrl = storageService.generatePresignedUploadUrl(storageKey, Duration.ofMinutes(15));
+        // Generate a storage key for AWS
+        String storageKey = namingHelper.createStorageKey(request);
+        log.info("[DOCUMENT_SERVICE][START] Generated the storage key: {}. Generating URL now...",
+                storageKey);
 
-        // 3. Map the DTO to our MongoDB Entity
-        DocumentMetadata metadata = DocumentMetadata.builder()
-                .applicationId(request.getApplicationId())
-                .documentType(request.getDocumentType())
-                .fileName(request.getFileName())
-                .fileSize(request.getFileSize())
-                .storageKey(storageKey)
-                .status(DocumentStatus.PENDING) // Explicitly starting as PENDING
-                .build();
+        // Generate a presigned URL for uploading document
+        String presignedUrl = storageService.generatePresignedUploadUrl(
+                storageKey,
+                Duration.ofMinutes(validityInMinutes)
+        );
+        log.info("[DOCUMENT_SERVICE][START] Successful generation of MinIO URL for {} minutes.",
+                validityInMinutes);
 
-        // 4. Persist metadata to MongoDB
+        // Unpack the request, as a metadata and persist it
+        DocumentMetadata metadata = documentObjectMapper.mapToDocumentMetaData(request, storageKey);
         DocumentMetadata savedMetadata = documentRepository.save(metadata);
-        log.info("Document metadata record saved successfully with ID: {}", savedMetadata.getId());
 
-        // 5. Map the saved entity back to our sanitized public Response DTO
-        return DocumentResponse.builder()
-                .id(savedMetadata.getId())
-                .applicationId(savedMetadata.getApplicationId())
-                .documentType(savedMetadata.getDocumentType())
-                .fileName(savedMetadata.getFileName())
-                .fileSize(savedMetadata.getFileSize())
-                .status(savedMetadata.getStatus())
-                .uploadUrl(presignedUrl)
-                .createdAt(savedMetadata.getCreatedAt())
-                .updatedAt(savedMetadata.getUpdatedAt())
-                .build();
+        log.info("[DOCUMENT_SERVICE][START] Successfully persisted the data for the document with generated MongoID: {}. Sending URL to user for uploading...",
+                savedMetadata.getId());
+
+        // Return the object back to the user
+        return documentObjectMapper.mapToDocumentUploadResponse(savedMetadata, presignedUrl);
+
     }
 
     @Override

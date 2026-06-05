@@ -24,6 +24,8 @@ aws:
     endpoint: ${S3_BUCKET_ENDPOINT}
 
 minio:
+  upload:
+    validity_in_minutes: ${MINIO_UPLOAD_VALIDITY_IN_MINUTES}
   webhook:
     secret-token: ${MINIO_SECRET_TOKEN}
 
