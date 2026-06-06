@@ -1,6 +1,6 @@
 package com.loan_org.document_service.document.service.impl;
 
-import com.loan_org.document_service.document.dto.UploadDocumentResponse;
+import com.loan_org.document_service.document.dto.UploadDocumentOutput;
 import com.loan_org.document_service.document.dto.UploadDocumentCommand;
 import com.loan_org.document_service.document.dto.DocumentResponse;
 import com.loan_org.document_service.document.model.DocumentMetadata;
@@ -29,7 +29,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
-    public UploadDocumentResponse initializeUpload(UploadDocumentCommand request) {
+    public UploadDocumentOutput initializeUpload(UploadDocumentCommand request) {
 
         // Log the request received acknowledgment
         log.info("[DOCUMENT_SERVICE][START] Received request to upload document {} for applicationId: {}. Starting upload now...",
@@ -59,7 +59,7 @@ public class DocumentServiceImpl implements DocumentService {
                 savedMetadata.getId());
 
         // Return the object back to the user
-        return UploadDocumentResponse.builder()
+        return UploadDocumentOutput.builder()
                 .id(metadata.getId())
                 .status(metadata.getStatus())
                 .fileName(metadata.getFileName())

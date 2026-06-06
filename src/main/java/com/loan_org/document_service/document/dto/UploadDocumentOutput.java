@@ -14,7 +14,7 @@ import lombok.Builder;
  * @param instruction The additional instruction on how to use
  */
 @Builder
-public record UploadDocumentResponse(
+public record UploadDocumentOutput(
         String id,
         String fileName,
         String fileType,
