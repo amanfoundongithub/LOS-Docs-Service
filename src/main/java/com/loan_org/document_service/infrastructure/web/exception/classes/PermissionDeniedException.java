@@ -13,4 +13,11 @@ public class PermissionDeniedException extends RuntimeException {
         this.reason = reason;
     }
 
+    public PermissionDeniedException(String endpoint, String reason) {
+        super(reason);
+        this.endpoint = endpoint;
+        this.userId = "";
+        this.reason = reason;
+    }
+
 }

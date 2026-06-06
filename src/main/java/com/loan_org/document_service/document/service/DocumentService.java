@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface DocumentService {
     UploadDocumentOutput   initializeUpload(UploadDocumentCommand request);
-    DocumentResponse       confirmUpload(String id);
+    void                   confirmUpload(String storageKey);
     List<DocumentResponse> getDocumentsByApplication(String applicationId);
     String                 generateDownloadUrl(String id);
 }

@@ -1,5 +1,6 @@
 package com.loan_org.document_service.infrastructure.web.exception;
 
+import com.loan_org.document_service.document.exception.DocumentNotFoundException;
 import com.loan_org.document_service.infrastructure.web.exception.classes.PermissionDeniedException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -22,15 +23,34 @@ public class GlobalExceptionHandler {
                 ex.reason,
                 ex.userId);
 
-        ApiError errorMessage = ApiError.builder()
-                .timestamp(Instant.now())
-                .message(ex.reason)
-                .path(ex.endpoint)
-                .status(HttpStatus.FORBIDDEN.value())
-                .error(HttpStatus.FORBIDDEN.getReasonPhrase())
-                .build();
-
+        ApiError errorMessage = constructErrorResponse(HttpStatus.FORBIDDEN, ex.getMessage(), ex.endpoint);
         return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(DocumentNotFoundException.class)
+    public ResponseEntity<ApiError> handleDocumentNotFoundException(DocumentNotFoundException ex,
+                                                                    HttpServletRequest request) {
+
+        log.warn("[DOCUMENT_NOT_FOUND] The document was not found for the key: {} & value: {}",
+                ex.key,
+                ex.value);
+
+        ApiError errorMessage = constructErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), "/api/v1/internal/minio-callback");
+        return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
+    }
+
+
+
+
+
+    private ApiError constructErrorResponse(HttpStatus status, String message, String path) {
+        return ApiError.builder()
+                .timestamp(Instant.now())
+                .message(message)
+                .path(path)
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .build();
     }
 
 

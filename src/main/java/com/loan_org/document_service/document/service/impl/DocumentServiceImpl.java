@@ -3,12 +3,13 @@ package com.loan_org.document_service.document.service.impl;
 import com.loan_org.document_service.document.dto.UploadDocumentOutput;
 import com.loan_org.document_service.document.dto.UploadDocumentCommand;
 import com.loan_org.document_service.document.dto.DocumentResponse;
+import com.loan_org.document_service.document.exception.IllegalStateTransitionException;
 import com.loan_org.document_service.document.model.DocumentMetadata;
 import com.loan_org.document_service.document.model.DocumentStatus;
 import com.loan_org.document_service.document.port.DocumentRepository;
 import com.loan_org.document_service.document.port.DocumentStorageService;
 import com.loan_org.document_service.document.service.DocumentService;
-import com.loan_org.document_service.exception.classes.DocumentNotFoundException;
+import com.loan_org.document_service.document.exception.DocumentNotFoundException;
 import com.loan_org.document_service.document.port.StorageKeyResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,29 +71,34 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
-    public DocumentResponse confirmUpload(String id) {
-        log.info("Confirming upload completion for document ID: {}", id);
+    public void confirmUpload(String storageKey) {
 
-        // 1. Fetch record or throw our custom 404 exception if it's missing
-        DocumentMetadata metadata = documentRepository.findById(id)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found with ID: " + id));
+        // Log the acknowledgement that we received the document
+        log.info("[DOCUMENT_SERVICE][CONFIRM] Received document for storageKey: {}", storageKey);
 
-        // 2. State-Guard: Ensure we can only confirm documents that are actually PENDING
+        // Search in MongoDB, or else throw exception
+        DocumentMetadata metadata = documentRepository.findByStorageKey(storageKey)
+                .orElseThrow(() -> new DocumentNotFoundException("storageKey", storageKey));
+
+        log.info("[DOCUMENT_SERVICE][CONFIRM] Fetched document successfully. Now confirming the upload...");
+
+        // If it is not pending, then why are we even doing this?
         if (metadata.getStatus() != DocumentStatus.PENDING) {
-            log.warn("Invalid state transition attempt for document ID: {}. Current state: {}", id, metadata.getStatus());
-            throw new IllegalStateException("Document upload cannot be confirmed because status is: " + metadata.getStatus());
+            log.warn("[DOCUMENT_SERVICE][CONFIRM] Invalid state transition attempted for storageKey: {}. Current state: {}", storageKey, metadata.getStatus());
+            throw new IllegalStateTransitionException("Document upload cannot be confirmed because status is: " + metadata.getStatus(), "/api/v1");
         }
 
-        // 3. Mutate status to UPLOADED
+        // Mutate status to UPLOADED
         metadata.setStatus(DocumentStatus.UPLOADED);
-
-        // 4. Persist (Optimistic Locking via @Version handles concurrent conflicts here seamlessly!)
         DocumentMetadata updatedMetadata = documentRepository.save(metadata);
-        log.info("Document ID: {} successfully updated to status: UPLOADED", id);
+        log.info("[DOCUMENT_SERVICE][CONFIRM] The document in the storageKey: {} has been successfully confirmed! Updated status to : {}. Persisting data now...",
+                storageKey,
+                updatedMetadata.getStatus().name());
 
-        // TODO: In the next phases, we would emit a Kafka/RabbitMQ event right here!
+        // TODO: Emit Kafka event here, will do this later...
 
-        return mapToResponse(updatedMetadata);
+
+        // Completed
     }
 
     @Override
@@ -116,7 +122,7 @@ public class DocumentServiceImpl implements DocumentService {
 
         // 1. Fetch metadata record from MongoDB
         DocumentMetadata metadata = documentRepository.findById(id)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found with ID: " + id));
+                .orElseThrow(() -> new DocumentNotFoundException("Document not found with ID: " + id, "/api/v1"));
 
         // 2. State-Guard: Block link generation if the file bytes aren't verified yet
         if (metadata.getStatus() != DocumentStatus.UPLOADED) {
