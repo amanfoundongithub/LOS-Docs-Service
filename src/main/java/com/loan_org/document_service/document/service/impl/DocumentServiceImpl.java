@@ -1,6 +1,7 @@
 package com.loan_org.document_service.document.service.impl;
 
 import com.loan_org.document_service.document.dto.DocumentResponseEntity;
+import com.loan_org.document_service.document.dto.DownloadDocumentOutput;
 import com.loan_org.document_service.document.dto.UploadDocumentOutput;
 import com.loan_org.document_service.document.dto.UploadDocumentCommand;
 import com.loan_org.document_service.document.exception.IllegalStateTransitionException;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 
 @Slf4j
@@ -119,22 +121,36 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    @Transactional(readOnly = true) // Read-only optimization
-    public String generateDownloadUrl(String id) {
-        log.info("Generating secure download URL for document ID: {}", id);
+    @Transactional(readOnly = true)
+    public DownloadDocumentOutput generateDownloadUrl(String storageKey) {
 
-        // 1. Fetch metadata record from MongoDB
-        DocumentMetadata metadata = documentRepository.findById(id)
-                .orElseThrow(() -> new DocumentNotFoundException("Document not found with ID: " + id, "/api/v1"));
+        // Log the acknowledgment that we are generating URL
+        log.info("[DOCUMENT_SERVICE][DOWNLOAD] Generating a secure download URL for storageKey: {}", storageKey);
 
-        // 2. State-Guard: Block link generation if the file bytes aren't verified yet
+        // Fetch metadata record from MongoDB
+        DocumentMetadata metadata = documentRepository.findByStorageKey(storageKey)
+                .orElseThrow(() -> new DocumentNotFoundException("storageKey", storageKey));
+        log.info("[DOCUMENT_SERVICE][DOWNLOAD] Found the record in database. Checking if document uploaded or not...");
+
+        // State-Guard: Block link generation if the file bytes aren't verified yet
         if (metadata.getStatus() != DocumentStatus.UPLOADED) {
-            log.warn("Unauthorized download URL request for un-uploaded document ID: {}. Current status: {}", id, metadata.getStatus());
-            throw new IllegalStateException("Cannot generate download link because document status is: " + metadata.getStatus());
+            log.warn("[DOCUMENT_SERVICE][DOWNLOAD] Cannot generate URL for {} as document is currently: {}", storageKey, metadata.getStatus());
+            throw new IllegalStateTransitionException("Cannot generate download link because document status is: " + metadata.getStatus(), "abed");
         }
 
-        // 3. Generate a 10-minute read URL using the saved storage key path
-        return storageService.generateDownloadURL(metadata.getStorageKey());
+        // Generate a download URL
+        String url = storageService.generateDownloadURL(storageKey);
+        int validity = storageService.getValidityForMinutes();
+
+        log.info("[DOCUMENT_SERVICE][DOWNLOAD] Generated download URL for {} (validity : {} minutes). Sending to user...",
+                storageKey,
+                validity);
+
+        return DownloadDocumentOutput.builder()
+                .downloadUrl(url)
+                .createdTimestamp(Instant.now())
+                .validForMinutes(validity)
+                .build();
     }
 
     private DocumentResponseEntity mapToResponseEntity(DocumentMetadata metadata) {

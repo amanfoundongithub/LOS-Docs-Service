@@ -1,6 +1,8 @@
 package com.loan_org.document_service.infrastructure.web.mapper.impl;
 
 import com.loan_org.document_service.document.dto.DocumentResponseEntity;
+import com.loan_org.document_service.document.dto.DownloadDocumentOutput;
+import com.loan_org.document_service.infrastructure.web.dto.DocumentDownloadResponse;
 import com.loan_org.document_service.infrastructure.web.dto.DocumentResponse;
 import com.loan_org.document_service.document.dto.UploadDocumentCommand;
 import com.loan_org.document_service.document.dto.UploadDocumentOutput;
@@ -46,6 +48,15 @@ public class DocumentObjectMapperImpl implements DocumentObjectMapper {
         return entities.stream()
                 .map(this::toDocResponse)
                 .toList();
+    }
+
+    @Override
+    public DocumentDownloadResponse toDocumentDownloadResponse(DownloadDocumentOutput output) {
+        return DocumentDownloadResponse.builder()
+                .downloadUrl(output.downloadUrl())
+                .validForMinutes(output.validForMinutes())
+                .createdTimestamp(output.createdTimestamp())
+                .build();
     }
 
     private DocumentResponse toDocResponse(DocumentResponseEntity entity) {

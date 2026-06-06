@@ -28,4 +28,11 @@ public interface DocumentStorageService {
      * @return The link to download the actual document
      */
     String generateDownloadURL(String storageKey);
+
+    /**
+     * Gets the download validity in minutes
+     *
+     * @return The number of minutes the link is valid
+     */
+    int getValidityForMinutes();
 }

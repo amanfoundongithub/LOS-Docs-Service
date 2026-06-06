@@ -1,8 +1,6 @@
 package com.loan_org.document_service.infrastructure.web.controller;
 
-import com.loan_org.document_service.infrastructure.web.dto.DocumentResponse;
-import com.loan_org.document_service.infrastructure.web.dto.DocumentUploadResponse;
-import com.loan_org.document_service.infrastructure.web.dto.UploadRequest;
+import com.loan_org.document_service.infrastructure.web.dto.*;
 import com.loan_org.document_service.document.service.DocumentService;
 import com.loan_org.document_service.infrastructure.web.exception.classes.PermissionDeniedException;
 import com.loan_org.document_service.infrastructure.web.mapper.DocumentObjectMapper;
@@ -53,10 +51,11 @@ public class DocumentController {
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
-    @GetMapping("/{id}/download")
-    public ResponseEntity<Map<String, String>> getDownloadUrl(@PathVariable String id) {
-        log.info("Received request to fetch secure download link for document ID: {}", id);
-        String downloadUrl = documentService.generateDownloadUrl(id);
-        return ResponseEntity.ok(Map.of("downloadUrl", downloadUrl));
+    @PostMapping("/download")
+    public ResponseEntity<DocumentDownloadResponse> getDownloadUrl(@Valid @RequestBody DocumentDownloadRequest request) {
+        DocumentDownloadResponse downloadUrl = documentMapper.toDocumentDownloadResponse(
+                documentService.generateDownloadUrl(request.storageKey())
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(downloadUrl);
     }
 }

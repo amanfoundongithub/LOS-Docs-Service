@@ -1,6 +1,8 @@
 package com.loan_org.document_service.infrastructure.web.mapper;
 
 import com.loan_org.document_service.document.dto.DocumentResponseEntity;
+import com.loan_org.document_service.document.dto.DownloadDocumentOutput;
+import com.loan_org.document_service.infrastructure.web.dto.DocumentDownloadResponse;
 import com.loan_org.document_service.infrastructure.web.dto.DocumentResponse;
 import com.loan_org.document_service.document.dto.UploadDocumentCommand;
 import com.loan_org.document_service.document.dto.UploadDocumentOutput;
@@ -15,5 +17,7 @@ public interface DocumentObjectMapper {
     DocumentUploadResponse toControllerResponse(UploadDocumentOutput uploadResponse);
 
     List<DocumentResponse> toDocumentResponses(List<DocumentResponseEntity> entities);
+
+    DocumentDownloadResponse toDocumentDownloadResponse(DownloadDocumentOutput output);
 
 }

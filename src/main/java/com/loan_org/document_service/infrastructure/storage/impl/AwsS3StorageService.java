@@ -64,4 +64,10 @@ public class AwsS3StorageService implements DocumentStorageService {
         // 3. Graphically sign the read request and hand back the temporary string
         return s3Presigner.presignGetObject(presignRequest).url().toString();
     }
+
+    @Override
+    public int getValidityForMinutes() {
+        return validityInMinutes;
+    }
+
 }
