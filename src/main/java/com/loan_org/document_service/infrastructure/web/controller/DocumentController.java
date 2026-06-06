@@ -43,13 +43,6 @@ public class DocumentController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{id}/confirm")
-    public ResponseEntity<DocumentResponse> confirmUpload(@PathVariable String id) {
-        log.info("Received request to confirm upload for document ID: {}", id);
-        DocumentResponse response = documentService.confirmUpload(id);
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping("/applications/{applicationId}")
     public ResponseEntity<List<DocumentResponse>> getDocumentsByApplication(@PathVariable String applicationId) {
         log.info("Received request to fetch documents for loan application: {}", applicationId);
@@ -57,7 +50,7 @@ public class DocumentController {
         return ResponseEntity.ok(responseList);
     }
 
-    @GetMapping("/{id}/download-url")
+    @GetMapping("/{id}/download")
     public ResponseEntity<Map<String, String>> getDownloadUrl(@PathVariable String id) {
         log.info("Received request to fetch secure download link for document ID: {}", id);
         String downloadUrl = documentService.generateDownloadUrl(id);
