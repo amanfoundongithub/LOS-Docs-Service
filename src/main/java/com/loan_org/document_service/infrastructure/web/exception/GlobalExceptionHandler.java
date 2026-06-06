@@ -39,7 +39,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
     }
 
-
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleException(Exception ex,
+                                                    HttpServletRequest request) {
+        log.warn("[INTERNAL_SERVER_ERROR] An internal server error occurred while processing the request.");
+        ApiError errorMessage = constructErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), "path");
+        return new ResponseEntity<>(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
 
 
