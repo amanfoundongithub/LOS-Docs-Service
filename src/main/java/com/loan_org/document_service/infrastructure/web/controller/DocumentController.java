@@ -4,6 +4,7 @@ import com.loan_org.document_service.document.dto.DocumentResponse;
 import com.loan_org.document_service.infrastructure.web.dto.DocumentUploadResponse;
 import com.loan_org.document_service.infrastructure.web.dto.UploadRequest;
 import com.loan_org.document_service.document.service.DocumentService;
+import com.loan_org.document_service.infrastructure.web.exception.classes.PermissionDeniedException;
 import com.loan_org.document_service.infrastructure.web.mapper.DocumentObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +33,7 @@ public class DocumentController {
                                                                    @RequestAttribute("userId") String userId,
                                                                    @RequestAttribute("canUpload") boolean canUpload) {
         if (!canUpload) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Unauthorized action");
-        }
-
-        if ("APPLICANT".equals(userRole) && !userId.equals(request.getApplicationId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
+            throw new PermissionDeniedException("/upload", userId, "No permission found for `document:upload` for user:" + userId);
         }
 
         DocumentUploadResponse response = documentMapper.toControllerResponse(
