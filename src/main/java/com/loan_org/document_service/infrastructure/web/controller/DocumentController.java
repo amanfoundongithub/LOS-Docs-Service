@@ -31,7 +31,7 @@ public class DocumentController {
                                                                    @RequestAttribute("userId") String userId,
                                                                    @RequestAttribute("canUpload") boolean canUpload) {
         if (!canUpload) {
-            throw new PermissionDeniedException("/upload", userId, "No permission found for `document:upload` for user:" + userId);
+            throw new PermissionDeniedException("/api/v1/documents/upload", userId, "No permission found for `document:upload` for user:" + userId);
         }
 
         DocumentUploadResponse response = documentMapper.toControllerResponse(
