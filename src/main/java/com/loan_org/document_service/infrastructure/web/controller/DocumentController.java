@@ -1,6 +1,6 @@
 package com.loan_org.document_service.infrastructure.web.controller;
 
-import com.loan_org.document_service.document.dto.DocumentResponse;
+import com.loan_org.document_service.infrastructure.web.dto.DocumentResponse;
 import com.loan_org.document_service.infrastructure.web.dto.DocumentUploadResponse;
 import com.loan_org.document_service.infrastructure.web.dto.UploadRequest;
 import com.loan_org.document_service.document.service.DocumentService;
@@ -46,9 +46,11 @@ public class DocumentController {
 
     @GetMapping("/applications/{applicationId}")
     public ResponseEntity<List<DocumentResponse>> getDocumentsByApplication(@PathVariable String applicationId) {
-        log.info("Received request to fetch documents for loan application: {}", applicationId);
-        List<DocumentResponse> responseList = documentService.getDocumentsByApplication(applicationId);
-        return ResponseEntity.ok(responseList);
+        List<DocumentResponse> responseList = documentMapper.toDocumentResponses(
+                documentService.getDocumentsByApplication(applicationId)
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
     @GetMapping("/{id}/download")

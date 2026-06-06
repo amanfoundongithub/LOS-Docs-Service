@@ -1,8 +1,8 @@
 package com.loan_org.document_service.document.service.impl;
 
+import com.loan_org.document_service.document.dto.DocumentResponseEntity;
 import com.loan_org.document_service.document.dto.UploadDocumentOutput;
 import com.loan_org.document_service.document.dto.UploadDocumentCommand;
-import com.loan_org.document_service.document.dto.DocumentResponse;
 import com.loan_org.document_service.document.exception.IllegalStateTransitionException;
 import com.loan_org.document_service.document.model.DocumentMetadata;
 import com.loan_org.document_service.document.model.DocumentStatus;
@@ -95,24 +95,27 @@ public class DocumentServiceImpl implements DocumentService {
                 storageKey,
                 updatedMetadata.getStatus().name());
 
-        // TODO: Emit Kafka event here, will do this later...
-
-
-        // Completed
+        // TODO: Emit Kafka event here, will do this later here...
     }
 
     @Override
-    @Transactional(readOnly = true) // Production Upgrade: Optimizes database resource allocation for reads
-    public List<DocumentResponse> getDocumentsByApplication(String applicationId) {
-        log.info("Fetching all documents associated with application ID: {}", applicationId);
+    @Transactional(readOnly = true)
+    public List<DocumentResponseEntity> getDocumentsByApplication(String applicationId) {
 
-        // 1. Fetch the documents from the database (utilizing the index we built on applicationId)
+        // Log the request that we acknowledged the request
+        log.info("[DOCUMENT_SERVICE][FETCH_ALL] Received request to fetch all documents for the applicationId : {}. Starting fetching now...",
+                applicationId);
+
+        // Fetch the documents from the database
         List<DocumentMetadata> documents = documentRepository.findByApplicationId(applicationId);
+        log.info("[DOCUMENT_SERVICE][FETCH_ALL] Successfully fetched {} records from the database for applicationId: {}. Sending them to user now...",
+                documents.size(),
+                applicationId);
 
-        // 2. Stream through the results, map each entity to our clean Response DTO, and compile them into a list
+        // Stream through the results, map each entity to our cleaned entity
         return documents.stream()
-                .map(this::mapToResponse)
-                .toList(); // Java 17 compact syntax
+                .map(this::mapToResponseEntity)
+                .toList();
     }
 
     @Override
@@ -134,16 +137,15 @@ public class DocumentServiceImpl implements DocumentService {
         return storageService.generateDownloadURL(metadata.getStorageKey());
     }
 
-    private DocumentResponse mapToResponse(DocumentMetadata metadata) {
-        return DocumentResponse.builder()
-                .id(metadata.getId())
-                .applicationId(metadata.getApplicationId())
+    private DocumentResponseEntity mapToResponseEntity(DocumentMetadata metadata) {
+        return DocumentResponseEntity.builder()
                 .documentType(metadata.getDocumentType())
                 .fileName(metadata.getFileName())
                 .fileSize(metadata.getFileSize())
                 .status(metadata.getStatus())
                 .createdAt(metadata.getCreatedAt())
                 .updatedAt(metadata.getUpdatedAt())
+                .storageKey(metadata.getStorageKey())
                 .build();
     }
 }

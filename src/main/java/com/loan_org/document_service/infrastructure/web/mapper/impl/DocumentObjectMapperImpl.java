@@ -1,13 +1,15 @@
 package com.loan_org.document_service.infrastructure.web.mapper.impl;
 
-import com.loan_org.document_service.document.dto.DocumentResponse;
+import com.loan_org.document_service.document.dto.DocumentResponseEntity;
+import com.loan_org.document_service.infrastructure.web.dto.DocumentResponse;
 import com.loan_org.document_service.document.dto.UploadDocumentCommand;
 import com.loan_org.document_service.document.dto.UploadDocumentOutput;
-import com.loan_org.document_service.document.model.DocumentMetadata;
 import com.loan_org.document_service.infrastructure.web.dto.DocumentUploadResponse;
 import com.loan_org.document_service.infrastructure.web.dto.UploadRequest;
 import com.loan_org.document_service.infrastructure.web.mapper.DocumentObjectMapper;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class DocumentObjectMapperImpl implements DocumentObjectMapper {
@@ -26,19 +28,6 @@ public class DocumentObjectMapperImpl implements DocumentObjectMapper {
     }
 
     @Override
-    public DocumentResponse toResponse(DocumentMetadata metadata, String uploadUrl) {
-        if (metadata == null){
-            return null;
-        }
-        return DocumentResponse.builder()
-                .id(metadata.getId())
-                .fileName(metadata.getFileName())
-                .status(metadata.getStatus())
-                .uploadUrl(uploadUrl)
-                .build();
-    }
-
-    @Override
     public DocumentUploadResponse toControllerResponse(UploadDocumentOutput uploadResponse) {
         if(uploadResponse == null) {
             return null;
@@ -52,5 +41,23 @@ public class DocumentObjectMapperImpl implements DocumentObjectMapper {
                 .build();
     }
 
+    @Override
+    public List<DocumentResponse> toDocumentResponses(List<DocumentResponseEntity> entities) {
+        return entities.stream()
+                .map(this::toDocResponse)
+                .toList();
+    }
+
+    private DocumentResponse toDocResponse(DocumentResponseEntity entity) {
+        return DocumentResponse.builder()
+                .documentType(entity.documentType())
+                .createdAt(entity.createdAt())
+                .fileSize(entity.fileSize())
+                .fileName(entity.fileName())
+                .updatedAt(entity.updatedAt())
+                .status(entity.status())
+                .storageKey(entity.storageKey())
+                .build();
+    }
 
 }
