@@ -38,22 +38,16 @@ public class MinioWebhookController {
             return ResponseEntity.ok().build();
         }
 
-        try {
-            for (MinioRecord record : payload.records()) {
-                String rawKey  = record.s3().object().key();
-                String fileKey = URLDecoder.decode(rawKey, StandardCharsets.UTF_8);
-                long fileSize  = record.s3().object().size();
+        for (MinioRecord record : payload.records()) {
+            String rawKey  = record.s3().object().key();
+            String fileKey = URLDecoder.decode(rawKey, StandardCharsets.UTF_8);
+            long fileSize  = record.s3().object().size();
 
-                log.info("Received file with key: {} & size: {}. Persisting to database...", fileKey, fileSize);
-                documentService.confirmUpload(fileKey);
-            }
-
-            return ResponseEntity.ok().build();
-
-        } catch (Exception e) {
-            log.error("Error processing webhook payload: " + e.getMessage());
-            return ResponseEntity.internalServerError().build();
+            log.info("Received file with key: {} & size: {}. Persisting to database...", fileKey, fileSize);
+            documentService.confirmUpload(fileKey);
         }
+
+        return ResponseEntity.ok().build();
     }
 }
 
