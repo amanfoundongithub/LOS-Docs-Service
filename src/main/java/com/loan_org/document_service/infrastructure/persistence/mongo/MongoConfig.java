@@ -1,4 +1,4 @@
-package com.loan_org.document_service.infrastructure.config;
+package com.loan_org.document_service.infrastructure.persistence.mongo;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;

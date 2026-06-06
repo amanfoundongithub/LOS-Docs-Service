@@ -1,7 +1,7 @@
 package com.loan_org.document_service.infrastructure.web.controller;
 
 import com.loan_org.document_service.document.dto.DocumentResponse;
-import com.loan_org.document_service.document.dto.DocumentUploadResponse;
+import com.loan_org.document_service.infrastructure.web.dto.DocumentUploadResponse;
 import com.loan_org.document_service.infrastructure.web.dto.UploadRequest;
 import com.loan_org.document_service.document.service.DocumentService;
 import com.loan_org.document_service.infrastructure.web.mapper.DocumentObjectMapper;
@@ -39,7 +39,13 @@ public class DocumentController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
         }
 
-        return ResponseEntity.ok(documentService.initializeUpload(documentMapper.toCommand(request)));
+        DocumentUploadResponse response = documentMapper.toControllerResponse(
+                documentService.initializeUpload(
+                        documentMapper.toCommand(request)
+                )
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{id}/confirm")

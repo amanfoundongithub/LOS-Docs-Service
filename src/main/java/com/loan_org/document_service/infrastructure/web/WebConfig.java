@@ -1,4 +1,4 @@
-package com.loan_org.document_service.infrastructure.config;
+package com.loan_org.document_service.infrastructure.web;
 
 import com.loan_org.document_service.infrastructure.web.interceptor.JwtInterceptor;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.loan_org.document_service.document.dto;
+package com.loan_org.document_service.infrastructure.web.dto;
 
 import com.loan_org.document_service.document.model.DocumentStatus;
 import lombok.Builder;
@@ -10,7 +10,7 @@ public class DocumentUploadResponse {
     private String id;
     private String fileName;
     private String fileType;
-    private DocumentStatus status;
+    private String status;
     private String uploadUrl;
 
     @Builder.Default

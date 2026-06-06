@@ -1,19 +1,18 @@
 package com.loan_org.document_service.infrastructure.storage.impl;
 
-import com.loan_org.document_service.infrastructure.storage.StorageService;
+import com.loan_org.document_service.document.port.DocumentStorageService;
 import org.springframework.stereotype.Service;
-import java.time.Duration;
 
 @Service
-public class MockStorageService implements StorageService {
+public class MockStorageService implements DocumentStorageService {
 
     @Override
-    public String generatePresignedUploadUrl(String storageKey, Duration duration) {
+    public String generateUploadURL(String storageKey) {
         return "https://mock-s3-bucket.s3.amazonaws.com/" + storageKey + "?token=mock-crypto-handshake-sig";
     }
 
     @Override
-    public String generatePresignedDownloadUrl(String storageKey, Duration duration) {
+    public String generateDownloadURL(String storageKey) {
         return "";
     }
 

@@ -1,22 +1,20 @@
 package com.loan_org.document_service.document.service.impl;
 
-import com.loan_org.document_service.document.dto.DocumentUploadResponse;
+import com.loan_org.document_service.document.dto.UploadDocumentResponse;
 import com.loan_org.document_service.document.dto.UploadDocumentCommand;
 import com.loan_org.document_service.document.dto.DocumentResponse;
 import com.loan_org.document_service.document.model.DocumentMetadata;
 import com.loan_org.document_service.document.model.DocumentStatus;
 import com.loan_org.document_service.document.port.DocumentRepository;
+import com.loan_org.document_service.document.port.DocumentStorageService;
 import com.loan_org.document_service.document.service.DocumentService;
 import com.loan_org.document_service.exception.classes.DocumentNotFoundException;
 import com.loan_org.document_service.document.port.StorageKeyResolver;
-import com.loan_org.document_service.infrastructure.storage.StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.util.List;
 
 @Slf4j
@@ -24,18 +22,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DocumentServiceImpl implements DocumentService {
 
-    // Inject the variables from yaml
-    @Value("${minio.upload.validity_in_minutes}")
-    private int validityInMinutes;
-
     // Services to inject for help
     private final DocumentRepository      documentRepository;
-    private final StorageService          storageService;
+    private final DocumentStorageService  storageService;
     private final StorageKeyResolver      namingHelper;
 
     @Override
     @Transactional
-    public DocumentUploadResponse initializeUpload(UploadDocumentCommand request) {
+    public UploadDocumentResponse initializeUpload(UploadDocumentCommand request) {
 
         // Log the request received acknowledgment
         log.info("[DOCUMENT_SERVICE][START] Received request to upload document {} for applicationId: {}. Starting upload now...",
@@ -47,12 +41,8 @@ public class DocumentServiceImpl implements DocumentService {
                 storageKey);
 
         // Generate a presigned URL for uploading document
-        String presignedUrl = storageService.generatePresignedUploadUrl(
-                storageKey,
-                Duration.ofMinutes(validityInMinutes)
-        );
-        log.info("[DOCUMENT_SERVICE][START] Successful generation of MinIO URL for {} minutes.",
-                validityInMinutes);
+        String presignedUrl = storageService.generateUploadURL(storageKey);
+        log.info("[DOCUMENT_SERVICE][START] Successful generation of MinIO URL");
 
         // Unpack the request, as a metadata and persist it
         DocumentMetadata metadata = DocumentMetadata.builder()
@@ -69,7 +59,7 @@ public class DocumentServiceImpl implements DocumentService {
                 savedMetadata.getId());
 
         // Return the object back to the user
-        return DocumentUploadResponse.builder()
+        return UploadDocumentResponse.builder()
                 .id(metadata.getId())
                 .status(metadata.getStatus())
                 .fileName(metadata.getFileName())
@@ -135,7 +125,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         // 3. Generate a 10-minute read URL using the saved storage key path
-        return storageService.generatePresignedDownloadUrl(metadata.getStorageKey(), Duration.ofMinutes(10));
+        return storageService.generateDownloadURL(metadata.getStorageKey());
     }
 
     private DocumentResponse mapToResponse(DocumentMetadata metadata) {

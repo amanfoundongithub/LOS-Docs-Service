@@ -2,7 +2,9 @@ package com.loan_org.document_service.infrastructure.web.mapper.impl;
 
 import com.loan_org.document_service.document.dto.DocumentResponse;
 import com.loan_org.document_service.document.dto.UploadDocumentCommand;
+import com.loan_org.document_service.document.dto.UploadDocumentResponse;
 import com.loan_org.document_service.document.model.DocumentMetadata;
+import com.loan_org.document_service.infrastructure.web.dto.DocumentUploadResponse;
 import com.loan_org.document_service.infrastructure.web.dto.UploadRequest;
 import com.loan_org.document_service.infrastructure.web.mapper.DocumentObjectMapper;
 import org.springframework.stereotype.Component;
@@ -35,4 +37,20 @@ public class DocumentObjectMapperImpl implements DocumentObjectMapper {
                 .uploadUrl(uploadUrl)
                 .build();
     }
+
+    @Override
+    public DocumentUploadResponse toControllerResponse(UploadDocumentResponse uploadResponse) {
+        if(uploadResponse == null) {
+            return null;
+        }
+        return DocumentUploadResponse.builder()
+                .id(uploadResponse.id())
+                .fileName(uploadResponse.fileName())
+                .fileType(uploadResponse.fileType())
+                .status(uploadResponse.status().name())
+                .uploadUrl(uploadResponse.uploadUrl())
+                .build();
+    }
+
+
 }

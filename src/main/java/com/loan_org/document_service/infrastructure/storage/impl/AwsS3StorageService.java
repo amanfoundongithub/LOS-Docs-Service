@@ -1,6 +1,6 @@
 package com.loan_org.document_service.infrastructure.storage.impl;
 
-import com.loan_org.document_service.infrastructure.storage.StorageService;
+import com.loan_org.document_service.document.port.DocumentStorageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,11 @@ import java.time.Duration;
 
 @Service
 @Primary
-public class AwsS3StorageService implements StorageService {
+public class AwsS3StorageService implements DocumentStorageService {
+
+    // Inject the variables from yaml
+    @Value("${minio.upload.validity_in_minutes}")
+    private int validityInMinutes;
 
     private final S3Presigner s3Presigner;
     private final String bucketName;
@@ -26,7 +30,7 @@ public class AwsS3StorageService implements StorageService {
     }
 
     @Override
-    public String generatePresignedUploadUrl(String storageKey, Duration duration) {
+    public String generateUploadURL(String storageKey) {
         // 1. Describe the S3 object metadata targeting our secured bucket
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
@@ -35,7 +39,7 @@ public class AwsS3StorageService implements StorageService {
 
         // 2. Configure the signing operation details (including time-to-live)
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                .signatureDuration(duration)
+                .signatureDuration(Duration.ofMinutes(validityInMinutes))
                 .putObjectRequest(putObjectRequest)
                 .build();
 
@@ -44,7 +48,7 @@ public class AwsS3StorageService implements StorageService {
     }
 
     @Override
-    public String generatePresignedDownloadUrl(String storageKey, Duration duration) {
+    public String generateDownloadURL(String storageKey) {
         // 1. Define the object path target within our private bucket
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucketName)
@@ -53,7 +57,7 @@ public class AwsS3StorageService implements StorageService {
 
         // 2. Set the read signature constraints (e.g., valid for 10 minutes)
         GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                .signatureDuration(duration)
+                .signatureDuration(Duration.ofMinutes(validityInMinutes))
                 .getObjectRequest(getObjectRequest)
                 .build();
 

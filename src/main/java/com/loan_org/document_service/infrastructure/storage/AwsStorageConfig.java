@@ -1,4 +1,4 @@
-package com.loan_org.document_service.infrastructure.config;
+package com.loan_org.document_service.infrastructure.storage;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
