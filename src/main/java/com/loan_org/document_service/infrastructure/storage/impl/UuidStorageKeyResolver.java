@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
-public class FileStorageNameHelperUsingUUIDImpl implements StorageKeyResolver {
+public class UuidStorageKeyResolver implements StorageKeyResolver {
 
     @Override
     public String createStorageKey(UploadDocumentCommand uploadRequest) {
