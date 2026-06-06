@@ -60,11 +60,11 @@ public class DocumentServiceImpl implements DocumentService {
 
         // Return the object back to the user
         return UploadDocumentOutput.builder()
-                .id(metadata.getId())
-                .status(metadata.getStatus())
-                .fileName(metadata.getFileName())
+                .id(savedMetadata.getId())
+                .status(savedMetadata.getStatus())
+                .fileName(savedMetadata.getFileName())
                 .uploadUrl(presignedUrl)
-                .fileType(metadata.getContentType())
+                .fileType(savedMetadata.getDocumentType())
                 .build();
     }
 

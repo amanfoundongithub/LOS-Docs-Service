@@ -7,7 +7,7 @@ import com.loan_org.document_service.document.dto.DocumentResponse;
 import java.util.List;
 
 public interface DocumentService {
-    UploadDocumentOutput initializeUpload(UploadDocumentCommand request);
+    UploadDocumentOutput   initializeUpload(UploadDocumentCommand request);
     DocumentResponse       confirmUpload(String id);
     List<DocumentResponse> getDocumentsByApplication(String applicationId);
     String                 generateDownloadUrl(String id);
