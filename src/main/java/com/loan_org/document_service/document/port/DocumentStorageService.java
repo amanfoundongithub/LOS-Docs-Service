@@ -8,7 +8,7 @@ package com.loan_org.document_service.document.port;
  * as per the hexagonal pattern.
  * </p>
  * @author amanfoundongithub
- * @version 1.0.0
+ * @version 2.0.0
  */
 public interface DocumentStorageService {
 
@@ -22,17 +22,17 @@ public interface DocumentStorageService {
     String generateUploadURL(String storageKey);
 
     /**
+     * Gets the download validity in minutes
+     *
+     * @return The number of minutes the link is valid
+     */
+    int    getUploadDocumentValidityInMinutes();
+
+    /**
      * Generates a Download URL to download the document.
      *
      * @param storageKey The key to download from
      * @return The link to download the actual document
      */
     String generateDownloadURL(String storageKey);
-
-    /**
-     * Gets the download validity in minutes
-     *
-     * @return The number of minutes the link is valid
-     */
-    int    getValidityForMinutes();
 }
