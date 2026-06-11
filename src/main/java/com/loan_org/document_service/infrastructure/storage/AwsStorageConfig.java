@@ -6,7 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Configuration; // Add this import
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.net.URI;
@@ -26,20 +27,39 @@ public class AwsStorageConfig {
     @Value("${aws.secret-key}")
     private String secretKey;
 
-    @Bean
-    public S3Presigner s3Presigner() {
-        // Force the SDK to place the bucket name inside the URL path instead of the hostname
-        S3Configuration serviceConfiguration = S3Configuration.builder()
+    private S3Configuration getSharedS3Configuration() {
+        return S3Configuration.builder()
                 .pathStyleAccessEnabled(true)
                 .build();
+    }
 
+    private StaticCredentialsProvider getStaticCredentialsProvider() {
+        return StaticCredentialsProvider.create(
+                AwsBasicCredentials.create(accessKey, secretKey)
+        );
+    }
+
+    @Bean
+    public S3Presigner s3Presigner() {
         return S3Presigner.builder()
                 .region(Region.of(awsRegion))
                 .endpointOverride(URI.create(s3Endpoint))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)
-                ))
-                .serviceConfiguration(serviceConfiguration) // Attach the path-style config here
+                .credentialsProvider(getStaticCredentialsProvider())
+                .serviceConfiguration(getSharedS3Configuration())
                 .build();
+    }
+
+    @Bean
+    public S3Client s3Client() {
+        var builder = S3Client.builder()
+                .region(Region.of(awsRegion))
+                .credentialsProvider(getStaticCredentialsProvider())
+                .serviceConfiguration(getSharedS3Configuration());
+
+        if (s3Endpoint != null && !s3Endpoint.isBlank()) {
+            builder.endpointOverride(URI.create(s3Endpoint));
+        }
+
+        return builder.build();
     }
 }
