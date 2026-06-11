@@ -1,9 +1,10 @@
-package com.loan_org.document_service.infrastructure.messaging.rabbitmq;
+package com.loan_org.document_service.infrastructure.messaging.rabbitmq.ingestion;
 
 import com.loan_org.document_service.document.model.DocumentStatus;
 import com.loan_org.document_service.document.port.DocumentRepository;
 import com.loan_org.document_service.document.port.DocumentStorageService;
 import com.loan_org.document_service.infrastructure.messaging.PipelineFailureException;
+import com.loan_org.document_service.infrastructure.messaging.rabbitmq.RabbitMQConfig;
 import com.loan_org.document_service.infrastructure.messaging.rabbitmq.verification.DocumentVerificationInput;
 import com.loan_org.document_service.infrastructure.messaging.rabbitmq.verification.DocumentVerificationPublisher;
 import com.loan_org.document_service.infrastructure.virus_scanner.VirusScanner;

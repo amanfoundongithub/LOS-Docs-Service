@@ -2,6 +2,7 @@ package com.loan_org.document_service.infrastructure.messaging.rabbitmq;
 
 import com.loan_org.document_service.document.model.DocumentMetadata;
 import com.loan_org.document_service.document.port.DocumentScanner;
+import com.loan_org.document_service.infrastructure.messaging.rabbitmq.ingestion.DocumentAnalysisInput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
