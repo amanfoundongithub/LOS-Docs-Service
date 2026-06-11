@@ -2,6 +2,7 @@ package com.loan_org.document_service.infrastructure.messaging.rabbitmq;
 
 import com.loan_org.document_service.document.model.DocumentMetadata;
 import com.loan_org.document_service.document.port.DocumentScanner;
+import com.loan_org.document_service.infrastructure.messaging.rabbitmq.ingestion.DocumentAnalysisInput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -19,7 +20,7 @@ public class DocumentScannerRabbitMQImpl implements DocumentScanner {
         log.info("[DOCUMENT_SCANNER] Queueing scan request for Document ID: {}", documentData.getId());
 
         DocumentAnalysisInput eventPayload = new DocumentAnalysisInput(
-                documentData.getId(), documentData.getStorageKey()
+                documentData.getId(), documentData.getStorageKey(), documentData.getDocumentType().toString()
         );
 
         rabbitTemplate.convertAndSend(
