@@ -1,14 +1,20 @@
 package com.loan_org.document_service.document.dto.upload;
 
-import com.loan_org.document_service.document.decorator.ValidContentType;
+import com.loan_org.document_service.document.constraints.ValidationConstants;
+import com.loan_org.document_service.document.constraints.decorator.ValidateContentType;
 import com.loan_org.document_service.document.model.DocumentType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * Defines a record class to store the configuration related to uploading
- * of document in our domain class.
+ * This is a record class that stores all the variables requested by the {@link com.loan_org.document_service.document.service.DocumentService Document Service}
+ * to service the upload functionality for the document. It contains all the meta-data parameters
+ * related to the saving of the document.
+ *
+ * <p>
+ *     <strong>(For HTTP model, refer to {@link com.loan_org.document_service.infrastructure.web.dto.UploadRequest UploadRequest}.)</strong>
+ * </p>
  *
  * @param applicationId The application ID of the loan
  * @param customerId    The unique ID of the applicant owning this document
@@ -22,22 +28,23 @@ import jakarta.validation.constraints.NotNull;
  */
 public record UploadDocumentCommand(
 
-        @NotBlank(message = "Application ID is required, to connect with loan.")
+        @NotBlank(message = ValidationConstants.APPLICATION_ID_NOT_BLANK_MESSAGE)
         String       applicationId,
 
-        @NotBlank(message = "Customer ID is required for audit purposes.")
+        @NotBlank(message = ValidationConstants.CUSTOMER_ID_NOT_BLANK_MESSAGE)
         String       customerId,
 
-        @NotNull(message = "Document type is required to proceed for validation.")
+        @NotNull(message = ValidationConstants.DOCUMENT_TYPE_NOT_BLANK_MESSAGE)
         DocumentType documentType,
 
-        @NotBlank(message = "Content Type is required to save the document.")
-        @ValidContentType
+        @NotBlank(message = ValidationConstants.CONTENT_TYPE_NOT_BLANK_MESSAGE)
+        @ValidateContentType(message = ValidationConstants.CONTENT_TYPE_NOT_VALID_MESSAGE)
         String       contentType,
 
-        @NotBlank(message = "File name is required to save the file.")
+        @NotBlank(message = ValidationConstants.FILE_NAME_NOT_BLANK_MESSAGE)
         String       fileName,
 
-        @Min(value = 1, message = "File size must be greater than 0 bytes.")
+        @Min(value = ValidationConstants.MIN_FILE_SIZE_IN_BYTES,
+                message = ValidationConstants.FILE_MINIMUM_SIZE_MESSAGE)
         long         fileSize
 ) {}
