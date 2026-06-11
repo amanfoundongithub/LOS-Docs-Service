@@ -39,6 +39,12 @@ public interface DocumentStorageService {
     String generateDownloadURL(String storageKey);
 
     /**
+     * Gets the download validity in minutes.
+     *
+     * @return The number of minutes the link is valid
+     */
+    int    getDownloadDocumentValidityInMinutes();
+    /**
      * Retrieves the raw binary byte stream of an object straight from cloud storage.
      * Crucial for asynchronous background processing pipelines (Virus scanning).
      *
