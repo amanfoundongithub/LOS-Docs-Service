@@ -17,7 +17,7 @@ import java.time.Instant;
  * document.
  *
  * @author amanfoundongithub
- * @version 1.0.0
+ * @version 2.0.0
  */
 @Data
 @Builder
