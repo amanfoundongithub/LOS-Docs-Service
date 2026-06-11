@@ -4,6 +4,8 @@ import com.loan_org.document_service.document.model.DocumentStatus;
 import com.loan_org.document_service.document.port.DocumentRepository;
 import com.loan_org.document_service.document.port.DocumentStorageService;
 import com.loan_org.document_service.infrastructure.messaging.PipelineFailureException;
+import com.loan_org.document_service.infrastructure.messaging.rabbitmq.publish.DocumentVerificationInput;
+import com.loan_org.document_service.infrastructure.messaging.rabbitmq.publish.DocumentVerificationPublisher;
 import com.loan_org.document_service.infrastructure.virus_scanner.VirusScanner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +19,10 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class DocumentIngestionConsumer {
 
-    private final DocumentRepository     documentRepository;
-    private final DocumentStorageService documentStorageService;
-    private final VirusScanner           virusScanner;
+    private final DocumentRepository            documentRepository;
+    private final DocumentStorageService        documentStorageService;
+    private final VirusScanner                  virusScanner;
+    private final DocumentVerificationPublisher verificationPublisher;
 
     @RabbitListener(queues = RabbitMQConfig.INBOUND_PROCESSING_QUEUE)
     public void processUploadDocument(DocumentAnalysisInput input) {
@@ -38,7 +41,15 @@ public class DocumentIngestionConsumer {
                 log.info("[DOCUMENT_INGESTION_CONSUMER] Document {} passed preliminary security checks. Marking as AVAILABLE.", input.documentId());
                 updateStatus(input.documentId(), DocumentStatus.AVAILABLE);
 
-                // TODO: Emit to Verification service to start their work. Next release...
+                String downloadUrl = documentStorageService.generateDownloadURL(input.storageKey());
+                log.info("[DOCUMENT_INGESTION_CONSUMER] Generated download URL for verification service. Sending for document verification,,,");
+                DocumentVerificationInput verificationInput = new DocumentVerificationInput(
+                        input.documentId(),
+                        input.storageKey(),
+                        downloadUrl,
+                        input.documentType()
+                );
+                verificationPublisher.broadcastDocumentUploaded(verificationInput);
 
             } else {
                 log.error("[DOCUMENT_INGESTION_CONSUMER] Document {} failed preliminary security checks. Flagging as REJECTED.", input.documentId());
