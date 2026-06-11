@@ -18,7 +18,7 @@ import java.time.Duration;
 public class AwsS3StorageService implements DocumentStorageService {
 
     @Value("${minio.upload.validity_in_minutes}")
-    private int validityInMinutes;
+    private int uploadValidityInMinutes;
 
     @Value("${minio.download.validity_in_minutes}")
     private int downloadValidityInMinutes;
@@ -39,7 +39,7 @@ public class AwsS3StorageService implements DocumentStorageService {
     public String generateUploadURL(String storageKey) {
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofMinutes(validityInMinutes))
+                .signatureDuration(Duration.ofMinutes(uploadValidityInMinutes))
                 .putObjectRequest(req -> req.bucket(bucketName).key(storageKey))
                 .build();
 
@@ -59,7 +59,7 @@ public class AwsS3StorageService implements DocumentStorageService {
 
     @Override
     public int getUploadDocumentValidityInMinutes() {
-        return validityInMinutes;
+        return uploadValidityInMinutes;
     }
 
     @Override
