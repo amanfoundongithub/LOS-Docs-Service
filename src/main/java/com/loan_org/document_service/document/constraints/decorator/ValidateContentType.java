@@ -1,6 +1,6 @@
 package com.loan_org.document_service.document.constraints.decorator;
 
-import com.loan_org.document_service.infrastructure.decorator.ContentTypeValidator;
+import com.loan_org.document_service.infrastructure.decorator.ValidateContentTypeImpl;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
@@ -20,7 +20,7 @@ import java.lang.annotation.*;
  * @version 2.0.0
  */
 @Documented
-@Constraint(validatedBy = ContentTypeValidator.class)
+@Constraint(validatedBy = ValidateContentTypeImpl.class)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidateContentType {
