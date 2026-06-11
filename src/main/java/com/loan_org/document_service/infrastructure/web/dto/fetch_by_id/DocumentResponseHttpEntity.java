@@ -1,4 +1,4 @@
-package com.loan_org.document_service.infrastructure.web.dto;
+package com.loan_org.document_service.infrastructure.web.dto.fetch_by_id;
 
 import com.loan_org.document_service.document.model.DocumentStatus;
 import lombok.Builder;
@@ -8,7 +8,7 @@ import java.time.Instant;
 
 @Data
 @Builder
-public class DocumentResponse {
+public class DocumentResponseHttpEntity {
     private String documentType;
     private String fileName;
     private long fileSize;
