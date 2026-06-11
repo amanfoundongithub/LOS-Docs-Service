@@ -10,6 +10,7 @@ public class RabbitMQConfig {
 
     // ─── STANDARD EXCHANGES & QUEUES ───
     public static final String DOCS_EXCHANGE = "docs.exchange";
+    public static final String VERIFICATION_EXCHANGE = "verification.exchange";
     public static final String INBOUND_PROCESSING_QUEUE = "docs.uploaded.processing.queue";
 
     // ─── DEAD LETTER INFRASTRUCTURE ───
@@ -30,6 +31,11 @@ public class RabbitMQConfig {
     @Bean
     public TopicExchange docsExchange() {
         return new TopicExchange(DOCS_EXCHANGE);
+    }
+
+    @Bean
+    public TopicExchange verificationExchange() {
+        return new TopicExchange(VERIFICATION_EXCHANGE, true, false);
     }
 
     @Bean
