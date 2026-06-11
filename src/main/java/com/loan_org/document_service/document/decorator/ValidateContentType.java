@@ -23,7 +23,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = ContentTypeValidator.class)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidContentType {
+public @interface ValidateContentType {
     String                     message() default "Invalid document content type. Supported formats are: PDF, JPEG, PNG.";
     Class<?>[]                 groups() default {};
     Class<? extends Payload>[] payload() default {};
