@@ -19,6 +19,7 @@ import lombok.Builder;
  * @param documentId  The ID of database
  * @param fileName    The file name
  * @param fileType    The file type
+ * @param contentType The content type of upload
  * @param status      The current status of upload
  * @param uploadUrl   The storage URL
  * @param instruction The additional instruction on how to use
@@ -28,6 +29,7 @@ public record UploadDocumentOutput(
         String         documentId,
         String         fileName,
         String         fileType,
+        String         contentType,
         DocumentStatus status,
         String         uploadUrl,
         String         instruction
