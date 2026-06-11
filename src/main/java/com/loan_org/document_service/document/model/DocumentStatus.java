@@ -19,10 +19,10 @@ public enum DocumentStatus {
     PROCESSING,
 
     /**
-     * Document successfully processed, classified, and OCR data extracted.
-     * Ready for underwriting use.
+     * Document successfully processed, classified and virus
+     * Ready for verification.
      */
-    VERIFIED,
+    VALID,
 
     /**
      * Document failed a step (e.g., malware detected, corrupt file, or unreadable).
