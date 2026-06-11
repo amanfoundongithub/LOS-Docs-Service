@@ -1,4 +1,4 @@
-package com.loan_org.document_service.document.decorator;
+package com.loan_org.document_service.document.constraints.decorator;
 
 import com.loan_org.document_service.infrastructure.decorator.ContentTypeValidator;
 import jakarta.validation.Constraint;
