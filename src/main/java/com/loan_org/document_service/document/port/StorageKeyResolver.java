@@ -10,7 +10,7 @@ import com.loan_org.document_service.document.dto.upload.UploadDocumentCommand;
  * as per the hexagonal pattern.
  * </p>
  * @author amanfoundongithub
- * @version 1.0.0
+ * @version 2.0.0
  */
 public interface StorageKeyResolver {
 
