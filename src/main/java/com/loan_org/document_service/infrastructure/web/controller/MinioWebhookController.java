@@ -2,7 +2,7 @@ package com.loan_org.document_service.infrastructure.web.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.loan_org.document_service.document.service.DocumentService;
-import com.loan_org.document_service.infrastructure.web.exception.classes.PermissionDeniedException;
+import com.loan_org.document_service.infrastructure.web.guard.PermissionGuard;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,29 +19,28 @@ import java.util.List;
 @Slf4j
 public class MinioWebhookController {
 
-    @Value("${minio.webhook.secret-token}")
+    @Value("${aws.webhook.secret-token}")
     private String expectedSecretToken;
 
     private final DocumentService documentService;
+    private final PermissionGuard permissionGuard;
 
     @PostMapping("/minio-callback")
-    public ResponseEntity<Void> handleMinioNotification(
+    ResponseEntity<Void> handleMinioNotification(
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @RequestBody MinioWebhookPayload payload) {
 
-        if (authToken == null || !authToken.contains(expectedSecretToken)) {
-            throw new PermissionDeniedException("/api/v1/internal/minio-callback", "Unauthorized entry into the MinIO callback");
-        }
+        permissionGuard.confirmMinIOEntry(authToken, "/api/v1/internal/minio-callback");
 
         if (payload.records() == null || payload.records().isEmpty()) {
             log.info("MinIO ping received and verified successfully!");
             return ResponseEntity.ok().build();
         }
 
-        for (MinioRecord record : payload.records()) {
-            String rawKey  = record.s3().object().key();
+        for (MinioRecord minioRecord : payload.records()) {
+            String rawKey  = minioRecord.s3().object().key();
             String fileKey = URLDecoder.decode(rawKey, StandardCharsets.UTF_8);
-            long fileSize  = record.s3().object().size();
+            long fileSize  = minioRecord.s3().object().size();
 
             log.info("Received file with key: {} & size: {}. Persisting to database...", fileKey, fileSize);
             documentService.confirmUpload(fileKey);

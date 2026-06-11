@@ -1,8 +1,12 @@
 package com.loan_org.document_service.infrastructure.web.controller;
 
-import com.loan_org.document_service.infrastructure.web.dto.*;
 import com.loan_org.document_service.document.service.DocumentService;
-import com.loan_org.document_service.infrastructure.web.exception.classes.PermissionDeniedException;
+import com.loan_org.document_service.infrastructure.web.dto.download.DocumentDownloadHttpRequest;
+import com.loan_org.document_service.infrastructure.web.dto.download.DocumentDownloadHttpResponse;
+import com.loan_org.document_service.infrastructure.web.dto.fetch_by_application_id.DocumentResponseHttpEntity;
+import com.loan_org.document_service.infrastructure.web.dto.upload.DocumentUploadHttpRequest;
+import com.loan_org.document_service.infrastructure.web.dto.upload.DocumentUploadHttpResponse;
+import com.loan_org.document_service.infrastructure.web.guard.PermissionGuard;
 import com.loan_org.document_service.infrastructure.web.mapper.DocumentObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,19 +27,19 @@ public class DocumentController {
     // Inject the service
     private final DocumentService      documentService;
     private final DocumentObjectMapper documentMapper;
+    private final PermissionGuard      permissionGuard;
 
     @PostMapping("/upload")
-    public ResponseEntity<DocumentUploadResponse> initializeUpload(@Valid @RequestBody UploadRequest request,
-                                                                   @RequestAttribute("userRole") String userRole,
-                                                                   @RequestAttribute("userId") String userId,
-                                                                   @RequestAttribute("canUpload") boolean canUpload) {
-        if (!canUpload) {
-            throw new PermissionDeniedException("/api/v1/documents/upload", userId, "No permission found for `document:upload` for user:" + userId);
-        }
+    public ResponseEntity<DocumentUploadHttpResponse> initializeUpload(@Valid @RequestBody DocumentUploadHttpRequest request,
+                                                                       @RequestAttribute("attributes") Map<String, Object> attributes) {
 
-        DocumentUploadResponse response = documentMapper.toControllerResponse(
+        // Enforce guard for permission to user for uploading
+        permissionGuard.canUserUpload(attributes, "/api/v1/documents/upload");
+
+        // If permission is cleared, then start upload
+        DocumentUploadHttpResponse response = documentMapper.toHttpUploadResponse(
                 documentService.initializeUpload(
-                        documentMapper.toCommand(request)
+                        documentMapper.toUploadCommand(request)
                 )
         );
 
@@ -43,8 +47,14 @@ public class DocumentController {
     }
 
     @GetMapping("/applications/{applicationId}")
-    public ResponseEntity<List<DocumentResponse>> getDocumentsByApplication(@PathVariable String applicationId) {
-        List<DocumentResponse> responseList = documentMapper.toDocumentResponses(
+    public ResponseEntity<List<DocumentResponseHttpEntity>> getDocumentsByApplication(@PathVariable String applicationId,
+                                                                                      @RequestAttribute("attributes") Map<String, Object> attributes){
+
+        // Enforce guard for permission to user for view
+        permissionGuard.canUserView(attributes, "/api/v1/documents/applications/" + applicationId);
+
+        // If permission is cleared, fetch all documents
+        List<DocumentResponseHttpEntity> responseList = documentMapper.toDocumentResponsesHttpEntities(
                 documentService.getDocumentsByApplication(applicationId)
         );
 
@@ -52,10 +62,17 @@ public class DocumentController {
     }
 
     @PostMapping("/download")
-    public ResponseEntity<DocumentDownloadResponse> getDownloadUrl(@Valid @RequestBody DocumentDownloadRequest request) {
-        DocumentDownloadResponse downloadUrl = documentMapper.toDocumentDownloadResponse(
-                documentService.generateDownloadUrl(request.storageKey())
+    public ResponseEntity<DocumentDownloadHttpResponse> getDownloadUrl(@Valid @RequestBody DocumentDownloadHttpRequest request,
+                                                                       @RequestAttribute("attributes") Map<String, Object> attributes) {
+
+        // Enforce guard for permission to user for downloading
+        permissionGuard.canUserDownload(attributes, "/api/v1/documents/download");
+
+        // If permission is cleared, then start download
+        DocumentDownloadHttpResponse downloadUrl = documentMapper.toDocumentDownloadHttpResponse(
+                documentService.generateDownloadUrl(request.getStorageKey())
         );
+
         return ResponseEntity.status(HttpStatus.CREATED).body(downloadUrl);
     }
 }

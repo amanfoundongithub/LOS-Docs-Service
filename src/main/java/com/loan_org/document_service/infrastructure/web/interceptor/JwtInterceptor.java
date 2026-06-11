@@ -40,8 +40,7 @@ public class JwtInterceptor implements HandlerInterceptor {
 
             request.setAttribute("userId", claims.getSubject());
             Map attributes = claims.get("attributes", Map.class);
-            request.setAttribute("userRole", attributes.get("user_role"));
-            request.setAttribute("canUpload", attributes.get("document:upload") != null);
+            request.setAttribute("attributes", attributes);
             return true;
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);

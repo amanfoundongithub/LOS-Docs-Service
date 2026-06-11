@@ -1,6 +1,6 @@
 package com.loan_org.document_service.document.port;
 
-import com.loan_org.document_service.document.dto.UploadDocumentCommand;
+import com.loan_org.document_service.document.dto.upload.UploadDocumentCommand;
 
 /**
  * Defines a port service saying that we have a method to determine the AWS key
@@ -10,7 +10,7 @@ import com.loan_org.document_service.document.dto.UploadDocumentCommand;
  * as per the hexagonal pattern.
  * </p>
  * @author amanfoundongithub
- * @version 1.0.0
+ * @version 2.0.0
  */
 public interface StorageKeyResolver {
 

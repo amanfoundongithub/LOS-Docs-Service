@@ -1,15 +1,16 @@
-package com.loan_org.document_service.document.service.impl;
+package com.loan_org.document_service.document.service;
 
 import com.loan_org.document_service.document.dto.DocumentResponseEntity;
 import com.loan_org.document_service.document.dto.DownloadDocumentOutput;
-import com.loan_org.document_service.document.dto.UploadDocumentOutput;
-import com.loan_org.document_service.document.dto.UploadDocumentCommand;
+import com.loan_org.document_service.document.dto.upload.UploadDocumentOutput;
+import com.loan_org.document_service.document.dto.upload.UploadDocumentCommand;
 import com.loan_org.document_service.document.exception.IllegalStateTransitionException;
+import com.loan_org.document_service.document.model.AllowedContentType;
 import com.loan_org.document_service.document.model.DocumentMetadata;
 import com.loan_org.document_service.document.model.DocumentStatus;
 import com.loan_org.document_service.document.port.DocumentRepository;
+import com.loan_org.document_service.document.port.DocumentScanner;
 import com.loan_org.document_service.document.port.DocumentStorageService;
-import com.loan_org.document_service.document.service.DocumentService;
 import com.loan_org.document_service.document.exception.DocumentNotFoundException;
 import com.loan_org.document_service.document.port.StorageKeyResolver;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,14 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository      documentRepository;
     private final DocumentStorageService  storageService;
     private final StorageKeyResolver      namingHelper;
+    private final DocumentScanner         documentScanner;
+
+    // Downloadable options
+    private final List<DocumentStatus> documentAvailableForDownload = List.of(
+            DocumentStatus.AVAILABLE,
+            DocumentStatus.UPLOADED,
+            DocumentStatus.PROCESSING
+    );
 
     @Override
     @Transactional
@@ -45,12 +54,15 @@ public class DocumentServiceImpl implements DocumentService {
 
         // Generate a presigned URL for uploading document
         String presignedUrl = storageService.generateUploadURL(storageKey);
-        log.info("[DOCUMENT_SERVICE][START] Successful generation of MinIO URL");
+        int    validity     = storageService.getUploadDocumentValidityInMinutes();
+        log.info("[DOCUMENT_SERVICE][START] Successful generation of MinIO URL for uploading document. Validity: {} minutes.",
+                validity);
 
         // Unpack the request, as a metadata and persist it
         DocumentMetadata metadata = DocumentMetadata.builder()
                 .applicationId(request.applicationId())
                 .documentType(request.documentType())
+                .contentType(AllowedContentType.fromMimeType(request.contentType()))
                 .fileName(request.fileName())
                 .fileSize(request.fileSize())
                 .storageKey(storageKey)
@@ -63,11 +75,11 @@ public class DocumentServiceImpl implements DocumentService {
 
         // Return the object back to the user
         return UploadDocumentOutput.builder()
-                .id(savedMetadata.getId())
+                .documentId(savedMetadata.getId())
                 .status(savedMetadata.getStatus())
                 .fileName(savedMetadata.getFileName())
                 .uploadUrl(presignedUrl)
-                .fileType(savedMetadata.getDocumentType())
+                .fileType(String.valueOf(savedMetadata.getDocumentType()))
                 .build();
     }
 
@@ -76,28 +88,30 @@ public class DocumentServiceImpl implements DocumentService {
     public void confirmUpload(String storageKey) {
 
         // Log the acknowledgement that we received the document
-        log.info("[DOCUMENT_SERVICE][CONFIRM] Received document for storageKey: {}", storageKey);
+        log.info("[DOCUMENT_SERVICE][CONFIRM] Received document for storageKey: {} from user.", storageKey);
 
         // Search in MongoDB, or else throw exception
         DocumentMetadata metadata = documentRepository.findByStorageKey(storageKey)
                 .orElseThrow(() -> new DocumentNotFoundException("storageKey", storageKey));
 
-        log.info("[DOCUMENT_SERVICE][CONFIRM] Fetched document successfully. Now confirming the upload...");
+        log.info("[DOCUMENT_SERVICE][CONFIRM] Fetched document metadata successfully. Now confirming the upload...");
 
         // If it is not pending, then why are we even doing this?
         if (metadata.getStatus() != DocumentStatus.PENDING) {
-            log.warn("[DOCUMENT_SERVICE][CONFIRM] Invalid state transition attempted for storageKey: {}. Current state: {}", storageKey, metadata.getStatus());
-            throw new IllegalStateTransitionException("Document upload cannot be confirmed because status is: " + metadata.getStatus(), "/api/v1");
+            log.warn("[DOCUMENT_SERVICE][CONFIRM] Invalid state transition attempted for storageKey: {}. Current state: {}. Aborting.", storageKey, metadata.getStatus());
+            throw new IllegalStateTransitionException("Document upload cannot be confirmed because status is: " + metadata.getStatus(), "<endpoint>");
         }
 
         // Mutate status to UPLOADED
         metadata.setStatus(DocumentStatus.UPLOADED);
         DocumentMetadata updatedMetadata = documentRepository.save(metadata);
-        log.info("[DOCUMENT_SERVICE][CONFIRM] The document in the storageKey: {} has been successfully confirmed! Updated status to : {}. Persisting data now...",
+        log.info("[DOCUMENT_SERVICE][CONFIRM] The document in the storageKey: {} has been successfully confirmed! Updated status to : {}. Starting background scans now...",
                 storageKey,
                 updatedMetadata.getStatus().name());
 
-        // TODO: Emit Kafka event here, will do this later here...
+        // Start background scanning for confirmation
+        documentScanner.startScan(updatedMetadata);
+
     }
 
     @Override
@@ -125,22 +139,22 @@ public class DocumentServiceImpl implements DocumentService {
     public DownloadDocumentOutput generateDownloadUrl(String storageKey) {
 
         // Log the acknowledgment that we are generating URL
-        log.info("[DOCUMENT_SERVICE][DOWNLOAD] Generating a secure download URL for storageKey: {}", storageKey);
+        log.info("[DOCUMENT_SERVICE][DOWNLOAD] Generating a secure download URL for storageKey: {}...", storageKey);
 
         // Fetch metadata record from MongoDB
         DocumentMetadata metadata = documentRepository.findByStorageKey(storageKey)
                 .orElseThrow(() -> new DocumentNotFoundException("storageKey", storageKey));
-        log.info("[DOCUMENT_SERVICE][DOWNLOAD] Found the record in database. Checking if document uploaded or not...");
+        log.info("[DOCUMENT_SERVICE][DOWNLOAD] Found the record in database. Checking if document is uploaded or not...");
 
         // State-Guard: Block link generation if the file bytes aren't verified yet
-        if (metadata.getStatus() != DocumentStatus.UPLOADED) {
+        if (!documentAvailableForDownload.contains(metadata.getStatus())) {
             log.warn("[DOCUMENT_SERVICE][DOWNLOAD] Cannot generate URL for {} as document is currently: {}", storageKey, metadata.getStatus());
             throw new IllegalStateTransitionException("Cannot generate download link because document status is: " + metadata.getStatus(), "abed");
         }
 
         // Generate a download URL
-        String url = storageService.generateDownloadURL(storageKey);
-        int validity = storageService.getValidityForMinutes();
+        String url   = storageService.generateDownloadURL(storageKey);
+        int validity = storageService.getDownloadDocumentValidityInMinutes();
 
         log.info("[DOCUMENT_SERVICE][DOWNLOAD] Generated download URL for {} (validity : {} minutes). Sending to user...",
                 storageKey,
@@ -155,7 +169,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     private DocumentResponseEntity mapToResponseEntity(DocumentMetadata metadata) {
         return DocumentResponseEntity.builder()
-                .documentType(metadata.getDocumentType())
+                .documentType(String.valueOf(metadata.getDocumentType()))
                 .fileName(metadata.getFileName())
                 .fileSize(metadata.getFileSize())
                 .status(metadata.getStatus())
