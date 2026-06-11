@@ -1,4 +1,4 @@
-package com.loan_org.document_service.infrastructure.web.dto.fetch_by_id;
+package com.loan_org.document_service.infrastructure.web.dto.fetch_by_application_id;
 
 import com.loan_org.document_service.document.model.DocumentStatus;
 import lombok.Builder;
