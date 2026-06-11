@@ -25,26 +25,26 @@ import java.time.Instant;
 public class DocumentMetadata {
 
     @Id
-    private String id;             // ID associated with MongoDB
+    private String             id;             // ID associated with MongoDB
 
     @Indexed
-    private String applicationId;  // applicationId is required to tie the document with a specific application
+    private String             applicationId;  // applicationId is required to tie the document with a specific application
 
-    private String documentType;   // Type of the document
-    private String fileName;       // Name of the document
-    private String contentType;    // Content type of the document (currently only application/pdf)
-    private long   fileSize;       // File size, to be determined for the document
-    private String storageKey;     // AWS storage key
+    private DocumentType       documentType;   // Type of the document
+    private String             fileName;       // Name of the document
+    private AllowedContentType contentType;    // Content type of the document (currently only application/pdf)
+    private long               fileSize;       // File size, to be determined for the document
+    private String             storageKey;     // AWS storage key
 
     @Indexed
-    private DocumentStatus status; // Status of the document in the application
+    private DocumentStatus     status;         // Status of the document in the application
 
     @CreatedDate
-    private Instant createdAt;     // Audit purpose, stores created timestamp
+    private Instant            createdAt;      // Audit purpose, stores created timestamp
 
     @LastModifiedDate
-    private Instant updatedAt;     // Store last updated timestamp
+    private Instant            updatedAt;     // Store last updated timestamp
 
     @Version
-    private Long version;          // Concurrency protection for database write
+    private Long               version;       // Concurrency protection for database write
 }
