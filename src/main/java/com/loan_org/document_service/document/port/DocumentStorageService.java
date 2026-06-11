@@ -34,5 +34,5 @@ public interface DocumentStorageService {
      *
      * @return The number of minutes the link is valid
      */
-    int getValidityForMinutes();
+    int    getValidityForMinutes();
 }
