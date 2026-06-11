@@ -47,7 +47,13 @@ public class DocumentController {
     }
 
     @GetMapping("/applications/{applicationId}")
-    public ResponseEntity<List<DocumentResponseHttpEntity>> getDocumentsByApplication(@PathVariable String applicationId) {
+    public ResponseEntity<List<DocumentResponseHttpEntity>> getDocumentsByApplication(@PathVariable String applicationId,
+                                                                                      @RequestAttribute("attributes") Map<String, Object> attributes){
+
+        // Enforce guard for permission to user for view
+        permissionGuard.canUserView(attributes, "/api/v1/documents/applications/" + applicationId);
+
+        // If permission is cleared, fetch all documents
         List<DocumentResponseHttpEntity> responseList = documentMapper.toDocumentResponsesHttpEntities(
                 documentService.getDocumentsByApplication(applicationId)
         );

@@ -29,6 +29,14 @@ public class PermissionGuardImpl implements PermissionGuard {
     }
 
     @Override
+    public void canUserView(Map<String, Object> attributes, String endpoint) {
+        if(attributes.get("document:view") == null) {
+            throw new PermissionDeniedException(endpoint,
+                    "The user does not have the permission to view document(s). Check your permission or contact administrator");
+        }
+    }
+
+    @Override
     public void confirmMinIOEntry(String authToken, String endpoint) {
         if (authToken == null || !authToken.contains(expectedSecretToken)) {
             throw new PermissionDeniedException(endpoint,
