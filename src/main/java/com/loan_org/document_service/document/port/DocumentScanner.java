@@ -1,5 +1,7 @@
 package com.loan_org.document_service.document.port;
 
+import com.loan_org.document_service.document.model.DocumentMetadata;
+
 /**
  * Defines a contract for document scan after it is uploaded
  *
@@ -11,8 +13,8 @@ public interface DocumentScanner {
     /**
      * Starts the scan process
      *
-     * @param storageKey The storage key for the document to be scanned
+     * @param documentData The data from MongoDB
      */
-    void startScan(String storageKey);
+    void startScan(DocumentMetadata documentData);
 
 }
