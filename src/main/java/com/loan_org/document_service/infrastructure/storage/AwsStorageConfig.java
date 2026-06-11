@@ -41,12 +41,17 @@ public class AwsStorageConfig {
 
     @Bean
     public S3Presigner s3Presigner() {
-        return S3Presigner.builder()
+        var builder =  S3Presigner.builder()
                 .region(Region.of(awsRegion))
-                .endpointOverride(URI.create(s3Endpoint))
                 .credentialsProvider(getStaticCredentialsProvider())
-                .serviceConfiguration(getSharedS3Configuration())
-                .build();
+                .serviceConfiguration(getSharedS3Configuration());
+
+        if (s3Endpoint != null && !s3Endpoint.isBlank()) {
+            builder.endpointOverride(URI.create(s3Endpoint));
+        }
+
+        return builder.build();
+
     }
 
     @Bean
