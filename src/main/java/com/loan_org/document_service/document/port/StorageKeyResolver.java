@@ -1,6 +1,6 @@
 package com.loan_org.document_service.document.port;
 
-import com.loan_org.document_service.document.dto.UploadDocumentCommand;
+import com.loan_org.document_service.document.dto.upload.UploadDocumentCommand;
 
 /**
  * Defines a port service saying that we have a method to determine the AWS key
