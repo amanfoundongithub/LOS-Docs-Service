@@ -5,6 +5,7 @@ MINIO_PASSWORD:
 MINIO_SECRET_TOKEN:
 
 MINIO_UPLOAD_VALIDITY_IN_MINUTES: 30
+MINIO_DOWNLOAD_VALIDITY_IN_MINUTES: 30
 
 # AWS naming configurations
 S3_BUCKET_ENDPOINT: http://localhost:9000
@@ -13,3 +14,20 @@ S3_BUCKET_REGION: us-east-1
 
 # JWT related configuration (get the same as IAM service)
 JWT_SIGNING_KEY:
+
+# CLAMAV configuration
+CLAMAV_HOST: localhost
+CLAMAV_PORT: 3310
+CLAMAV_TIMEOUT_IN_MILLIS: 30000
+CLAMAV_CHUNK_SIZE: 2048
+
+# RabbitMQ configuration
+RABBITMQ_HOST: localhost
+RABBITMQ_PORT: 5672
+RABBITMQ_USERNAME:
+RABBITMQ_PASSWORD:
+
+# MongoDB related credentials
+MONGODB_HOST: localhost
+MONGODB_PORT: 27017
+MONGODB_DATABASE_NAME: document_service

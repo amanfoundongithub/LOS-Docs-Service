@@ -7,13 +7,29 @@ spring:
 
   data:
     mongodb:
-      host: localhost
-      port: 27017
-      database: document_service
+      host: ${MONGODB_HOST}
+      port: ${MONGODB_PORT}
+      database: ${MONGODB_DATABASE_NAME}
       auto-index-creation: true
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    listener:
+      simple:
+        retry:
+          enabled: false
 
 server:
   port: 5800
+
+clamav:
+  host: ${CLAMAV_HOST}
+  port: ${CLAMAV_PORT}
+  timeout: ${CLAMAV_TIMEOUT_IN_MILLIS}
+  chunk_size: ${CLAMAV_CHUNK_SIZE}
 
 aws:
   region: ${S3_BUCKET_REGION}
@@ -22,10 +38,10 @@ aws:
   s3:
     bucket-name: ${S3_BUCKET_NAME}
     endpoint: ${S3_BUCKET_ENDPOINT}
-
-minio:
   upload:
     validity_in_minutes: ${MINIO_UPLOAD_VALIDITY_IN_MINUTES}
+  download:
+    validity_in_minutes: ${MINIO_DOWNLOAD_VALIDITY_IN_MINUTES}
   webhook:
     secret-token: ${MINIO_SECRET_TOKEN}
 
