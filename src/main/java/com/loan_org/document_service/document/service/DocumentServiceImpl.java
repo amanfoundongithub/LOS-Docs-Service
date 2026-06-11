@@ -79,28 +79,28 @@ public class DocumentServiceImpl implements DocumentService {
     public void confirmUpload(String storageKey) {
 
         // Log the acknowledgement that we received the document
-        log.info("[DOCUMENT_SERVICE][CONFIRM] Received document for storageKey: {}", storageKey);
+        log.info("[DOCUMENT_SERVICE][CONFIRM] Received document for storageKey: {} from user.", storageKey);
 
         // Search in MongoDB, or else throw exception
         DocumentMetadata metadata = documentRepository.findByStorageKey(storageKey)
                 .orElseThrow(() -> new DocumentNotFoundException("storageKey", storageKey));
 
-        log.info("[DOCUMENT_SERVICE][CONFIRM] Fetched document successfully. Now confirming the upload...");
+        log.info("[DOCUMENT_SERVICE][CONFIRM] Fetched document metadata successfully. Now confirming the upload...");
 
         // If it is not pending, then why are we even doing this?
         if (metadata.getStatus() != DocumentStatus.PENDING) {
-            log.warn("[DOCUMENT_SERVICE][CONFIRM] Invalid state transition attempted for storageKey: {}. Current state: {}", storageKey, metadata.getStatus());
-            throw new IllegalStateTransitionException("Document upload cannot be confirmed because status is: " + metadata.getStatus(), "/api/v1");
+            log.warn("[DOCUMENT_SERVICE][CONFIRM] Invalid state transition attempted for storageKey: {}. Current state: {}. Aborting.", storageKey, metadata.getStatus());
+            throw new IllegalStateTransitionException("Document upload cannot be confirmed because status is: " + metadata.getStatus(), "<endpoint>");
         }
 
         // Mutate status to UPLOADED
         metadata.setStatus(DocumentStatus.UPLOADED);
         DocumentMetadata updatedMetadata = documentRepository.save(metadata);
-        log.info("[DOCUMENT_SERVICE][CONFIRM] The document in the storageKey: {} has been successfully confirmed! Updated status to : {}. Persisting data now...",
+        log.info("[DOCUMENT_SERVICE][CONFIRM] The document in the storageKey: {} has been successfully confirmed! Updated status to : {}. Starting background scans now...",
                 storageKey,
                 updatedMetadata.getStatus().name());
 
-        // Start background scanning
+        // Start background scanning for confirmation
         documentScanner.startScan(updatedMetadata);
 
     }
