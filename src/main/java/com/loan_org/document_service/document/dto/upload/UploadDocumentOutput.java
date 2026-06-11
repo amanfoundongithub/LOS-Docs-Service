@@ -1,6 +1,7 @@
 package com.loan_org.document_service.document.dto.upload;
 
 import com.loan_org.document_service.document.model.DocumentStatus;
+import com.loan_org.document_service.infrastructure.web.dto.upload.DocumentUploadHttpResponse;
 import lombok.Builder;
 
 /**
@@ -9,7 +10,7 @@ import lombok.Builder;
  * after the success.
  *
  * <p>
- *     <strong>(For the HTTP model, refer to {@link com.loan_org.document_service.infrastructure.web.dto.DocumentUploadResponse DocumentUploadResponse} object.)</strong>
+ *     <strong>(For the HTTP model, refer to {@link DocumentUploadHttpResponse DocumentUploadResponse} object.)</strong>
  * </p>
  *
  * @author amanfoundongithub

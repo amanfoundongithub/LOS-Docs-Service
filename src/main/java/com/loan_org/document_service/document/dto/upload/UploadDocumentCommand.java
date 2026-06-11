@@ -3,6 +3,7 @@ package com.loan_org.document_service.document.dto.upload;
 import com.loan_org.document_service.document.constraints.ValidationConstants;
 import com.loan_org.document_service.document.constraints.decorator.ValidateContentType;
 import com.loan_org.document_service.document.model.DocumentType;
+import com.loan_org.document_service.infrastructure.web.dto.upload.DocumentUploadHttpRequest;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,7 +14,7 @@ import jakarta.validation.constraints.NotNull;
  * related to the saving of the document.
  *
  * <p>
- *     <strong>(For HTTP model, refer to {@link com.loan_org.document_service.infrastructure.web.dto.UploadRequest UploadRequest}.)</strong>
+ *     <strong>(For HTTP model, refer to {@link DocumentUploadHttpRequest UploadRequest}.)</strong>
  * </p>
  *
  * @param applicationId The application ID of the loan
