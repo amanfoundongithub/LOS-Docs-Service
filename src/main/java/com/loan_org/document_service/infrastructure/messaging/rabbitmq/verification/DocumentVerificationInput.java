@@ -1,4 +1,4 @@
-package com.loan_org.document_service.infrastructure.messaging.rabbitmq.publish;
+package com.loan_org.document_service.infrastructure.messaging.rabbitmq.verification;
 
 import jakarta.validation.constraints.NotBlank;
 
