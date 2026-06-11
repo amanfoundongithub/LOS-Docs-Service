@@ -4,7 +4,16 @@ import com.loan_org.document_service.document.model.DocumentStatus;
 import lombok.Builder;
 
 /**
- * Defines a contract to mark the document upload as completed.
+ * This is a record class to give in response to user's request to create an instance metadata
+ * of the {@link UploadDocumentCommand UploadDocumentCommand}, as returned by the {@link com.loan_org.document_service.document.service.DocumentService Document Service}
+ * after the success.
+ *
+ * <p>
+ *     <strong>(For the HTTP model, refer to {@link com.loan_org.document_service.infrastructure.web.dto.DocumentUploadResponse DocumentUploadResponse} object.)</strong>
+ * </p>
+ *
+ * @author amanfoundongithub
+ * @version 2.0.0
  *
  * @param documentId  The ID of database
  * @param fileName    The file name
