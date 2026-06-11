@@ -17,10 +17,10 @@ import java.time.Duration;
 @Primary
 public class AwsS3StorageService implements DocumentStorageService {
 
-    @Value("${minio.upload.validity_in_minutes}")
+    @Value("${aws.upload.validity_in_minutes}")
     private int uploadValidityInMinutes;
 
-    @Value("${minio.download.validity_in_minutes}")
+    @Value("${aws.download.validity_in_minutes}")
     private int downloadValidityInMinutes;
 
     private final S3Presigner s3Presigner;
