@@ -8,4 +8,6 @@ public interface PermissionGuard {
 
     void canUserDownload(Map<String, Object> attributes, String endpoint);
 
+    void confirmMinIOEntry(String authToken, String endpoint);
+
 }
