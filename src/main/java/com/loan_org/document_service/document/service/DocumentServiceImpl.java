@@ -32,6 +32,13 @@ public class DocumentServiceImpl implements DocumentService {
     private final StorageKeyResolver      namingHelper;
     private final DocumentScanner         documentScanner;
 
+    // Downloadable options
+    private final List<DocumentStatus> documentAvailableForDownload = List.of(
+            DocumentStatus.AVAILABLE,
+            DocumentStatus.UPLOADED,
+            DocumentStatus.PROCESSING
+    );
+
     @Override
     @Transactional
     public UploadDocumentOutput initializeUpload(UploadDocumentCommand request) {
@@ -47,7 +54,9 @@ public class DocumentServiceImpl implements DocumentService {
 
         // Generate a presigned URL for uploading document
         String presignedUrl = storageService.generateUploadURL(storageKey);
-        log.info("[DOCUMENT_SERVICE][START] Successful generation of MinIO URL for uploading document.");
+        int    validity     = storageService.getUploadDocumentValidityInMinutes();
+        log.info("[DOCUMENT_SERVICE][START] Successful generation of MinIO URL for uploading document. Validity: {} minutes.",
+                validity);
 
         // Unpack the request, as a metadata and persist it
         DocumentMetadata metadata = DocumentMetadata.builder()
@@ -130,22 +139,22 @@ public class DocumentServiceImpl implements DocumentService {
     public DownloadDocumentOutput generateDownloadUrl(String storageKey) {
 
         // Log the acknowledgment that we are generating URL
-        log.info("[DOCUMENT_SERVICE][DOWNLOAD] Generating a secure download URL for storageKey: {}", storageKey);
+        log.info("[DOCUMENT_SERVICE][DOWNLOAD] Generating a secure download URL for storageKey: {}...", storageKey);
 
         // Fetch metadata record from MongoDB
         DocumentMetadata metadata = documentRepository.findByStorageKey(storageKey)
                 .orElseThrow(() -> new DocumentNotFoundException("storageKey", storageKey));
-        log.info("[DOCUMENT_SERVICE][DOWNLOAD] Found the record in database. Checking if document uploaded or not...");
+        log.info("[DOCUMENT_SERVICE][DOWNLOAD] Found the record in database. Checking if document is uploaded or not...");
 
         // State-Guard: Block link generation if the file bytes aren't verified yet
-        if (metadata.getStatus() != DocumentStatus.UPLOADED) {
+        if (!documentAvailableForDownload.contains(metadata.getStatus())) {
             log.warn("[DOCUMENT_SERVICE][DOWNLOAD] Cannot generate URL for {} as document is currently: {}", storageKey, metadata.getStatus());
             throw new IllegalStateTransitionException("Cannot generate download link because document status is: " + metadata.getStatus(), "abed");
         }
 
         // Generate a download URL
-        String url = storageService.generateDownloadURL(storageKey);
-        int validity = storageService.getUploadDocumentValidityInMinutes();
+        String url   = storageService.generateDownloadURL(storageKey);
+        int validity = storageService.getDownloadDocumentValidityInMinutes();
 
         log.info("[DOCUMENT_SERVICE][DOWNLOAD] Generated download URL for {} (validity : {} minutes). Sending to user...",
                 storageKey,
