@@ -19,7 +19,7 @@ public class DocumentScannerRabbitMQImpl implements DocumentScanner {
         log.info("[DOCUMENT_SCANNER] Queueing scan request for Document ID: {}", documentData.getId());
 
         DocumentAnalysisInput eventPayload = new DocumentAnalysisInput(
-                documentData.getId(), documentData.getStorageKey()
+                documentData.getId(), documentData.getStorageKey(), documentData.getDocumentType().toString()
         );
 
         rabbitTemplate.convertAndSend(
