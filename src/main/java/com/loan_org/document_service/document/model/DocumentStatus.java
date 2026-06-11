@@ -22,10 +22,15 @@ public enum DocumentStatus {
      * Document successfully processed, classified and virus
      * Ready for verification.
      */
-    VALID,
+    AVAILABLE,
 
     /**
      * Document failed a step (e.g., malware detected, corrupt file, or unreadable).
      */
-    REJECTED
+    REJECTED,
+
+    /**
+     * Archived documents
+     */
+    ARCHIVED
 }
