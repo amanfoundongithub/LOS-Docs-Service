@@ -1,5 +1,7 @@
 package com.loan_org.document_service.document.port;
 
+import java.io.InputStream;
+
 /**
  * Defines a port service saying that we have Document storage service with the given
  * functions defined as part of the signature.
@@ -35,4 +37,13 @@ public interface DocumentStorageService {
      * @return The link to download the actual document
      */
     String generateDownloadURL(String storageKey);
+
+    /**
+     * Retrieves the raw binary byte stream of an object straight from cloud storage.
+     * Crucial for asynchronous background processing pipelines (Virus scanning).
+     *
+     * @param storageKey The path key of the file inside the bucket.
+     * @return InputStream containing the target file bytes.
+     */
+    InputStream downloadStream(String storageKey);
 }
