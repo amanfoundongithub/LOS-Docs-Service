@@ -1,4 +1,4 @@
-package com.loan_org.document_service.infrastructure.web.mapper.impl;
+package com.loan_org.document_service.infrastructure.web.mapper;
 
 import com.loan_org.document_service.document.dto.DocumentResponseEntity;
 import com.loan_org.document_service.document.dto.DownloadDocumentOutput;
@@ -8,7 +8,6 @@ import com.loan_org.document_service.document.dto.upload.UploadDocumentCommand;
 import com.loan_org.document_service.document.dto.upload.UploadDocumentOutput;
 import com.loan_org.document_service.infrastructure.web.dto.upload.DocumentUploadHttpResponse;
 import com.loan_org.document_service.infrastructure.web.dto.upload.DocumentUploadHttpRequest;
-import com.loan_org.document_service.infrastructure.web.mapper.DocumentObjectMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
