@@ -1,15 +1,16 @@
-package com.loan_org.document_service.document.service.impl;
+package com.loan_org.document_service.document.service;
 
 import com.loan_org.document_service.document.dto.DocumentResponseEntity;
 import com.loan_org.document_service.document.dto.DownloadDocumentOutput;
-import com.loan_org.document_service.document.dto.UploadDocumentOutput;
-import com.loan_org.document_service.document.dto.UploadDocumentCommand;
+import com.loan_org.document_service.document.dto.upload.UploadDocumentOutput;
+import com.loan_org.document_service.document.dto.upload.UploadDocumentCommand;
 import com.loan_org.document_service.document.exception.IllegalStateTransitionException;
+import com.loan_org.document_service.document.model.AllowedContentType;
 import com.loan_org.document_service.document.model.DocumentMetadata;
 import com.loan_org.document_service.document.model.DocumentStatus;
 import com.loan_org.document_service.document.port.DocumentRepository;
+import com.loan_org.document_service.document.port.DocumentScanner;
 import com.loan_org.document_service.document.port.DocumentStorageService;
-import com.loan_org.document_service.document.service.DocumentService;
 import com.loan_org.document_service.document.exception.DocumentNotFoundException;
 import com.loan_org.document_service.document.port.StorageKeyResolver;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentRepository      documentRepository;
     private final DocumentStorageService  storageService;
     private final StorageKeyResolver      namingHelper;
+    private final DocumentScanner         documentScanner;
 
     @Override
     @Transactional
@@ -45,12 +47,13 @@ public class DocumentServiceImpl implements DocumentService {
 
         // Generate a presigned URL for uploading document
         String presignedUrl = storageService.generateUploadURL(storageKey);
-        log.info("[DOCUMENT_SERVICE][START] Successful generation of MinIO URL");
+        log.info("[DOCUMENT_SERVICE][START] Successful generation of MinIO URL for uploading document.");
 
         // Unpack the request, as a metadata and persist it
         DocumentMetadata metadata = DocumentMetadata.builder()
                 .applicationId(request.applicationId())
                 .documentType(request.documentType())
+                .contentType(AllowedContentType.fromMimeType(request.contentType()))
                 .fileName(request.fileName())
                 .fileSize(request.fileSize())
                 .storageKey(storageKey)
@@ -63,11 +66,11 @@ public class DocumentServiceImpl implements DocumentService {
 
         // Return the object back to the user
         return UploadDocumentOutput.builder()
-                .id(savedMetadata.getId())
+                .documentId(savedMetadata.getId())
                 .status(savedMetadata.getStatus())
                 .fileName(savedMetadata.getFileName())
                 .uploadUrl(presignedUrl)
-                .fileType(savedMetadata.getDocumentType())
+                .fileType(String.valueOf(savedMetadata.getDocumentType()))
                 .build();
     }
 
@@ -97,7 +100,9 @@ public class DocumentServiceImpl implements DocumentService {
                 storageKey,
                 updatedMetadata.getStatus().name());
 
-        // TODO: Emit Kafka event here, will do this later here...
+        // Start background scanning
+        documentScanner.startScan(updatedMetadata);
+
     }
 
     @Override
@@ -140,7 +145,7 @@ public class DocumentServiceImpl implements DocumentService {
 
         // Generate a download URL
         String url = storageService.generateDownloadURL(storageKey);
-        int validity = storageService.getValidityForMinutes();
+        int validity = storageService.getUploadDocumentValidityInMinutes();
 
         log.info("[DOCUMENT_SERVICE][DOWNLOAD] Generated download URL for {} (validity : {} minutes). Sending to user...",
                 storageKey,
@@ -155,7 +160,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     private DocumentResponseEntity mapToResponseEntity(DocumentMetadata metadata) {
         return DocumentResponseEntity.builder()
-                .documentType(metadata.getDocumentType())
+                .documentType(String.valueOf(metadata.getDocumentType()))
                 .fileName(metadata.getFileName())
                 .fileSize(metadata.getFileSize())
                 .status(metadata.getStatus())
