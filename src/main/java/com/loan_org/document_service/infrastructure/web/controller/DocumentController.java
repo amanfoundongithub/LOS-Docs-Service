@@ -75,4 +75,17 @@ public class DocumentController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(downloadUrl);
     }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> downloadDocument(@RequestAttribute("attributes") Map<String, Object> attributes,
+                                             @RequestParam("storageKey") String storageKey) {
+
+        // Enforce guard for permission to user for deletion
+        permissionGuard.canUserDelete(attributes, "/api/v1/documents/delete");
+
+        // If permission is cleared, then delete document
+        documentService.deleteDocument(storageKey);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }
