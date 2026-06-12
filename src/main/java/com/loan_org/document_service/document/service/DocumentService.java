@@ -10,6 +10,7 @@ import java.util.List;
 public interface DocumentService {
     UploadDocumentOutput         initializeUpload(UploadDocumentCommand request);
     void                         confirmUpload(String storageKey);
+    DocumentResponseEntity       getDocumentByStorageKey(String storageKey);
     List<DocumentResponseEntity> getDocumentsByApplication(String applicationId);
     DownloadDocumentOutput       generateDownloadUrl(String storageKey);
     void                         deleteDocument(String storageKey);

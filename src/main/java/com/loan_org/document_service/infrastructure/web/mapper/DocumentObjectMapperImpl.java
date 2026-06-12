@@ -48,7 +48,7 @@ public class DocumentObjectMapperImpl implements DocumentObjectMapper {
     @Override
     public List<DocumentResponseHttpEntity> toDocumentResponsesHttpEntities(List<DocumentResponseEntity> entities) {
         return entities.stream()
-                .map(this::toDocResponse)
+                .map(this::toDocumentResponsesHttpEntity)
                 .toList();
     }
 
@@ -61,7 +61,8 @@ public class DocumentObjectMapperImpl implements DocumentObjectMapper {
                 .build();
     }
 
-    private DocumentResponseHttpEntity toDocResponse(DocumentResponseEntity entity) {
+    @Override
+    public DocumentResponseHttpEntity toDocumentResponsesHttpEntity(DocumentResponseEntity entity) {
         return DocumentResponseHttpEntity.builder()
                 .documentType(entity.documentType())
                 .createdAt(entity.createdAt())

@@ -117,6 +117,21 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional(readOnly = true)
+    public DocumentResponseEntity getDocumentByStorageKey(String storageKey) {
+
+        // Log the acknowledgment
+        log.info("[DOCUMENT_SERVICE][FETCH_ONE] Fetching document for storageKey: {}",
+                storageKey);
+
+        // Fetch document
+        return mapToResponseEntity(
+                documentRepository.findByStorageKey(storageKey)
+                        .orElseThrow(() -> new DocumentNotFoundException("storageKey", storageKey))
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<DocumentResponseEntity> getDocumentsByApplication(String applicationId) {
 
         // Log the request that we acknowledged the request
