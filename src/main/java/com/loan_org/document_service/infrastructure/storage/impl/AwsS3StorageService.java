@@ -58,6 +58,11 @@ public class AwsS3StorageService implements DocumentStorageService {
     }
 
     @Override
+    public String generateUpdateURL(String storageKey) {
+        return generateUploadURL(storageKey);
+    }
+
+    @Override
     public int getUploadDocumentValidityInMinutes() {
         return uploadValidityInMinutes;
     }
