@@ -13,6 +13,7 @@ The API description for the microservice is as follows:
 | `POST /api/v1/documents/download`                    | Helps the user to download the document, generating a secure `MinIO` download URL, along with metadata |
 | `GET /api/v1/documents/applications/{applicationId}` | Helps the user to fetch all the documents from the database for a given `applicationId`                |
 | `GET /api/v1/documents/fetch?storageKey=<key>`       | Helps the user to fetch one document with the given `storageKey`                                       |
+| `PUT /api/v1/documents/update?storageKey=<key>`      | Helps the user to update the document at the given `storageKey`                                        |
 | `DELETE /api/v1/documents/delete?storageKey=<key>`   | Helps the user to delete the document at the given `storageKey`.                                       |
 
 
