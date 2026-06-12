@@ -14,7 +14,7 @@ public class ValidateContentTypeImpl implements ConstraintValidator<ValidateCont
             return false;
         }
 
-        return AllowedContentType.isSupported(value.toLowerCase());
+        return AllowedContentType.isSupported(value.toLowerCase().trim());
 
     }
 
