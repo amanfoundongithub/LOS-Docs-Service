@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.loan_org'
-version = '0.0.1-SNAPSHOT'
+version = 'document-service-SNAPSHOT'
 
 java {
 	toolchain {
