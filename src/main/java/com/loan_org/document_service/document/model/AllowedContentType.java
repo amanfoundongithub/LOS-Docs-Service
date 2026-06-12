@@ -22,4 +22,13 @@ public enum AllowedContentType {
         throw new DocumentNotSupportedException(mimeType);
     }
 
+    public static boolean isSupported(String mimeType) {
+        for (AllowedContentType type : values()) {
+            if (type.mimeType.equalsIgnoreCase(mimeType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
