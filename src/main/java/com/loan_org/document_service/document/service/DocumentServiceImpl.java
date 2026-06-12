@@ -1,6 +1,7 @@
 package com.loan_org.document_service.document.service;
 
 import com.loan_org.document_service.document.dto.DocumentResponseEntity;
+import com.loan_org.document_service.document.dto.DocumentUpdateResponse;
 import com.loan_org.document_service.document.dto.DownloadDocumentOutput;
 import com.loan_org.document_service.document.dto.upload.UploadDocumentOutput;
 import com.loan_org.document_service.document.dto.upload.UploadDocumentCommand;
@@ -97,12 +98,6 @@ public class DocumentServiceImpl implements DocumentService {
 
         log.info("[DOCUMENT_SERVICE][CONFIRM] Fetched document metadata successfully. Now confirming the upload...");
 
-        // If it is not pending, then why are we even doing this?
-        if (metadata.getStatus() != DocumentStatus.PENDING) {
-            log.warn("[DOCUMENT_SERVICE][CONFIRM] Invalid state transition attempted for storageKey: {}. Current state: {}. Aborting.", storageKey, metadata.getStatus());
-            throw new IllegalStateTransitionException("Document upload cannot be confirmed because status is: " + metadata.getStatus(), "<endpoint>");
-        }
-
         // Mutate status to UPLOADED
         metadata.setStatus(DocumentStatus.UPLOADED);
         DocumentMetadata updatedMetadata = documentRepository.save(metadata);
@@ -128,6 +123,21 @@ public class DocumentServiceImpl implements DocumentService {
                 documentRepository.findByStorageKey(storageKey)
                         .orElseThrow(() -> new DocumentNotFoundException("storageKey", storageKey))
         );
+    }
+
+    @Override
+    @Transactional
+    public DocumentUpdateResponse updateDocument(String storageKey) {
+
+        // Log the acknowledgment for update
+        log.info("[DOCUMENT_SERVICE][UPDATE] Received the request to update document for storageKey: {}",
+                storageKey);
+
+        String updateUrl = storageService.generateUpdateURL(storageKey);
+        log.info("[DOCUMENT_SERVICE][UPDATE] Generated an update URL for: {}. Now sending this to user now...",
+                storageKey);
+
+        return new DocumentUpdateResponse(updateUrl);
     }
 
     @Override

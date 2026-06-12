@@ -4,6 +4,7 @@ import com.loan_org.document_service.document.service.DocumentService;
 import com.loan_org.document_service.infrastructure.web.dto.download.DocumentDownloadHttpRequest;
 import com.loan_org.document_service.infrastructure.web.dto.download.DocumentDownloadHttpResponse;
 import com.loan_org.document_service.infrastructure.web.dto.fetch_by_application_id.DocumentResponseHttpEntity;
+import com.loan_org.document_service.infrastructure.web.dto.update.DocumentUpdateHttpResponse;
 import com.loan_org.document_service.infrastructure.web.dto.upload.DocumentUploadHttpRequest;
 import com.loan_org.document_service.infrastructure.web.dto.upload.DocumentUploadHttpResponse;
 import com.loan_org.document_service.infrastructure.web.guard.PermissionGuard;
@@ -89,6 +90,21 @@ public class DocumentController {
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(downloadUrl);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<DocumentUpdateHttpResponse> updateDocument(@RequestParam("storageKey") String storageKey,
+                                                                     @RequestAttribute("attributes") Map<String, Object> attributes) {
+
+        // Enforce guard for permission to user for update
+        permissionGuard.canUserUpdate(attributes, "/api/v1/documents/update");
+
+        // If permission is cleared, then start update
+        DocumentUpdateHttpResponse updateHttpResponse = documentMapper.toDocumentUpdateHttpResponse(
+                documentService.updateDocument(storageKey)
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(updateHttpResponse);
     }
 
     @DeleteMapping("/delete")

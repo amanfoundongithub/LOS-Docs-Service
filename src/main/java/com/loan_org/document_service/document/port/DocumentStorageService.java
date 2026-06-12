@@ -39,6 +39,14 @@ public interface DocumentStorageService {
     String generateDownloadURL(String storageKey);
 
     /**
+     * Generates an update URL to update the document.
+     *
+     * @param storageKey The key to update from
+     * @return The link to update
+     */
+    String generateUpdateURL(String storageKey);
+
+    /**
      * Gets the download validity in minutes.
      *
      * @return The number of minutes the link is valid

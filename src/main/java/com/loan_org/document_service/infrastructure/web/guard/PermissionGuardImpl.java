@@ -37,6 +37,14 @@ public class PermissionGuardImpl implements PermissionGuard {
     }
 
     @Override
+    public void canUserUpdate(Map<String, Object> attributes, String endpoint) {
+        if(attributes.get("document:update") == null) {
+            throw new PermissionDeniedException(endpoint,
+                    "The user does not have the permission to update document(s). Check your permission or contact administrator");
+        }
+    }
+
+    @Override
     public void canUserDelete(Map<String, Object> attributes, String endpoint) {
         if(attributes.get("document:delete") == null) {
             throw new PermissionDeniedException(endpoint,

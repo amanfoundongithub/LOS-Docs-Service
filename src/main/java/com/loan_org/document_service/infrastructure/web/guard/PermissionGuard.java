@@ -10,6 +10,8 @@ public interface PermissionGuard {
 
     void canUserView(Map<String, Object> attributes, String endpoint);
 
+    void canUserUpdate(Map<String, Object> attributes, String endpoint);
+
     void canUserDelete(Map<String, Object> attributes, String endpoint);
 
     void confirmMinIOEntry(String authToken, String endpoint);
