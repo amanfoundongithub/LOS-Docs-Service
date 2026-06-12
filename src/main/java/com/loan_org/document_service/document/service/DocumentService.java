@@ -12,4 +12,5 @@ public interface DocumentService {
     void                         confirmUpload(String storageKey);
     List<DocumentResponseEntity> getDocumentsByApplication(String applicationId);
     DownloadDocumentOutput       generateDownloadUrl(String storageKey);
+    void                         deleteDocument(String storageKey);
 }

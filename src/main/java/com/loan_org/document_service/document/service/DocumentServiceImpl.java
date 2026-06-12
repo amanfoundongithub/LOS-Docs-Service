@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -166,6 +167,26 @@ public class DocumentServiceImpl implements DocumentService {
                 .validForMinutes(validity)
                 .build();
     }
+
+    @Override
+    @Transactional
+    public void deleteDocument(String storageKey) {
+
+        // Log the acknowledgment for the deletion request
+        log.info("[DOCUMENT_SERVICE][DELETE] Received request for deleting document in storageKey: {}",
+                storageKey);
+
+        DocumentMetadata documentMetadata = documentRepository.findByStorageKey(storageKey)
+                .orElseThrow(() -> new DocumentNotFoundException("storageKey", storageKey));
+        log.info("[DOCUMENT_SERVICE][DELETE] Found record in database. Deleting the record now...");
+
+        // Soft-delete the document (mark as archived)
+        documentMetadata.setStatus(DocumentStatus.ARCHIVED);
+        documentRepository.save(documentMetadata);
+        log.info("[DOCUMENT_SERVICE][DELETE] Deleted document in storageKey: {} successfully.",
+                storageKey);
+    }
+
 
     private DocumentResponseEntity mapToResponseEntity(DocumentMetadata metadata) {
         return DocumentResponseEntity.builder()
