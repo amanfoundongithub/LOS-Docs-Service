@@ -61,6 +61,21 @@ public class DocumentController {
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
+    @GetMapping("/fetch")
+    public ResponseEntity<DocumentResponseHttpEntity> getDocumentByStorageKey(@RequestParam("storageKey") String storageKey,
+                                                                              @RequestAttribute("attributes") Map<String, Object> attributes){
+
+        // Enforce guard for permission to user for view
+        permissionGuard.canUserView(attributes, "/api/v1/documents/fetch?storageKey=" + storageKey);
+
+        // If permission is cleared, fetch one document
+        DocumentResponseHttpEntity response = documentMapper.toDocumentResponsesHttpEntity(
+                documentService.getDocumentByStorageKey(storageKey)
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @PostMapping("/download")
     public ResponseEntity<DocumentDownloadHttpResponse> getDownloadUrl(@Valid @RequestBody DocumentDownloadHttpRequest request,
                                                                        @RequestAttribute("attributes") Map<String, Object> attributes) {

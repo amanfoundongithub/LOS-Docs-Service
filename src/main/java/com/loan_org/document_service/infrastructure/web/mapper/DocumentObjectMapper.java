@@ -19,6 +19,7 @@ public interface DocumentObjectMapper {
 
     // Fetching by Application ID
     List<DocumentResponseHttpEntity> toDocumentResponsesHttpEntities(List<DocumentResponseEntity> entities);
+    DocumentResponseHttpEntity       toDocumentResponsesHttpEntity(DocumentResponseEntity entity);
 
     // Download helpers
     DocumentDownloadHttpResponse     toDocumentDownloadHttpResponse(DownloadDocumentOutput output);
