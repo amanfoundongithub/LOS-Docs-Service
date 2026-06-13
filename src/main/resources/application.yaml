@@ -1,6 +1,6 @@
 spring:
   application:
-    name: document_service
+    name: docs-service
 
   profiles:
     active: local
@@ -47,3 +47,8 @@ aws:
 
 jwt:
   signing_key: ${JWT_SIGNING_KEY}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
