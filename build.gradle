@@ -22,6 +22,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
 
     // Defined for NFR purposes
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -44,6 +46,14 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 }
+
+dependencyManagement {
+    imports {
+        // This coordinates and provides the correct version for the Eureka client automatically
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
+    }
+}
+
 
 tasks.named('test') {
 	useJUnitPlatform()
