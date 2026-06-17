@@ -1,0 +1,125 @@
+name: los_document_system
+
+services:
+  document-service:
+    container_name: document-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5800:5800"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - MONGO_URI=mongodb://document-mongo:27017/document_db
+    depends_on:
+      minio-local:
+        condition: service_healthy
+      clamav-server:
+        condition: service_healthy
+      document-mongo:
+        condition: service_healthy
+    networks:
+      - loan-network
+
+  document-mongo:
+    image: mongo:latest
+    container_name: document-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - loan-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  clamav-server:
+    image: clamav/clamav:latest
+    platform: linux/amd64
+    container_name: clamav-server
+    ports:
+      - "3310:3310"
+    environment:
+      - CLAMAV_NO_FRESHCLAM_ON_STARTUP=true
+    networks:
+      - loan-network
+    healthcheck:
+      test: ["CMD", "clamdscan", "--version"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  minio-local:
+    image: quay.io/minio/minio:latest
+    container_name: minio-local
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=<MINIO USERNAME>
+      - MINIO_ROOT_PASSWORD=<MINIO PASSWORD>
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    restart: always
+    networks:
+      - loan-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio-provisioner:
+    image: minio/mc:latest
+    container_name: minio-provisioner
+    restart: "no"
+    depends_on:
+      minio-local:
+        condition: service_healthy
+    networks:
+      - loan-network
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Letting Spring Boot initialize first. Sleeping for 15 seconds...';
+      sleep 15;
+      
+      echo 'Connecting to MinIO engine storage...';
+      mc alias set local http://minio-local:9000 <MINIO USERNAME> <MINIO PASSWORD>;
+      
+      if ! mc ls local/documents > /dev/null 2>&1; then
+        echo 'Creating documents bucket...';
+        mc mb local/documents;
+      fi;
+      
+      echo 'Configuring Webhook endpoint notifications...';
+      mc admin config set local notify_webhook:endpoint1 endpoint='http://document-service:5800/api/v1/internal/minio-callback' auth_token=<MINIO SECRET TOKEN> queue_limit='1000';
+      
+      echo 'Restarting MinIO core engine...';
+      mc admin service restart local --json > /dev/null 2>&1 || true;
+      
+      echo 'Sleeping 5 seconds for configuration reload...';
+      sleep 5;
+      
+      echo 'Flushing any stale notification rules to prevent overlaps...';
+      mc event remove local/documents arn:minio:sqs::endpoint1:webhook --event put > /dev/null 2>&1 || true;
+      
+      echo 'Enabling Put upload event listener routing rules cleanly...';
+      mc event add local/documents arn:minio:sqs::endpoint1:webhook --event put;
+      
+      echo 'MinIO fully initialized successfully!';
+      "
+
+networks:
+  loan-network:
+    name: los-network
+    external: true
+
+volumes:
+  minio-data:
+    driver: local
+  mongo-data:
+    driver: local
