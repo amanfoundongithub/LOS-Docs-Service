@@ -98,7 +98,7 @@ public class JwtInterceptor implements HandlerInterceptor {
 
             request.setAttribute("userId", claims.getSubject());
 
-            @SuppressWarnings("unchecked")  // Intellij loves this for god's sake
+            @SuppressWarnings("unchecked")  // IntelliJ loves this for god's sake
             Map<String, Object> attributes =
                     (Map<String, Object>) claims.getOrDefault("attributes", Map.of());
 
