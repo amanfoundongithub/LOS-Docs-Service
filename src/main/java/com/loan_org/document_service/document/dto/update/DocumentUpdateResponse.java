@@ -1,4 +1,4 @@
-package com.loan_org.document_service.document.dto;
+package com.loan_org.document_service.document.dto.update;
 
 /**
  * This record class is used to store the output of the update path

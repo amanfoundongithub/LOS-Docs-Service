@@ -1,8 +1,8 @@
 package com.loan_org.document_service.infrastructure.web.mapper;
 
-import com.loan_org.document_service.document.dto.DocumentResponseEntity;
-import com.loan_org.document_service.document.dto.DocumentUpdateResponse;
-import com.loan_org.document_service.document.dto.DownloadDocumentOutput;
+import com.loan_org.document_service.document.dto.fetch.DocumentResponseEntity;
+import com.loan_org.document_service.document.dto.update.DocumentUpdateResponse;
+import com.loan_org.document_service.document.dto.download.DownloadDocumentOutput;
 import com.loan_org.document_service.infrastructure.web.dto.download.DocumentDownloadHttpResponse;
 import com.loan_org.document_service.infrastructure.web.dto.fetch_by_application_id.DocumentResponseHttpEntity;
 import com.loan_org.document_service.document.dto.upload.UploadDocumentCommand;
