@@ -21,7 +21,7 @@ import java.util.Map;
 @Component
 public class JwtInterceptor implements HandlerInterceptor {
 
-    @Value("${jwt.signing_key}")
+    @Value("${filter.jwt.signing_key}")
     private String signingKey;
 
     private SecretKey secretKey;
@@ -98,15 +98,15 @@ public class JwtInterceptor implements HandlerInterceptor {
 
             request.setAttribute("userId", claims.getSubject());
 
-            @SuppressWarnings("unchecked")  // Intellij loves this for god's sake
+            @SuppressWarnings("unchecked")  // IntelliJ loves this for god's sake
             Map<String, Object> attributes =
                     (Map<String, Object>) claims.getOrDefault("attributes", Map.of());
 
             request.setAttribute("attributes", attributes);
             return true;
-        } catch (ExpiredJwtException e) {
+        } catch (ExpiredJwtException _) {
             return unAuthorizedResponse(response, UNAUTHORIZED_MESSAGE_TOKEN_EXPIRED);
-        } catch (JwtException e) {
+        } catch (JwtException _) {
             return unAuthorizedResponse(response, UNAUTHORIZED_MESSAGE_TOKEN_INVALID);
         }
     }
