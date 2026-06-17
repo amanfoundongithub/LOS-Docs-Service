@@ -21,7 +21,7 @@ import java.util.Map;
 @Component
 public class JwtInterceptor implements HandlerInterceptor {
 
-    @Value("${jwt.signing_key}")
+    @Value("${filter.jwt.signing_key}")
     private String signingKey;
 
     private SecretKey secretKey;
@@ -104,9 +104,9 @@ public class JwtInterceptor implements HandlerInterceptor {
 
             request.setAttribute("attributes", attributes);
             return true;
-        } catch (ExpiredJwtException e) {
+        } catch (ExpiredJwtException _) {
             return unAuthorizedResponse(response, UNAUTHORIZED_MESSAGE_TOKEN_EXPIRED);
-        } catch (JwtException e) {
+        } catch (JwtException _) {
             return unAuthorizedResponse(response, UNAUTHORIZED_MESSAGE_TOKEN_INVALID);
         }
     }
