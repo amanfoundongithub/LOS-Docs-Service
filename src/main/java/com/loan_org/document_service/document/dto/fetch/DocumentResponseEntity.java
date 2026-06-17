@@ -1,4 +1,4 @@
-package com.loan_org.document_service.document.dto;
+package com.loan_org.document_service.document.dto.fetch;
 
 import com.loan_org.document_service.document.model.DocumentStatus;
 import lombok.Builder;
@@ -18,11 +18,11 @@ import java.time.Instant;
  */
 @Builder
 public record DocumentResponseEntity(
-        String storageKey,
-        String documentType,
-        String fileName,
-        long   fileSize,
+        String         storageKey,
+        String         documentType,
+        String         fileName,
+        long           fileSize,
         DocumentStatus status,
-        Instant createdAt,
-        Instant updatedAt
+        Instant        createdAt,
+        Instant        updatedAt
 ) {}

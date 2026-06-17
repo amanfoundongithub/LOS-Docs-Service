@@ -1,8 +1,8 @@
-package com.loan_org.document_service.document.service;
+package com.loan_org.document_service.document.service.impl;
 
-import com.loan_org.document_service.document.dto.DocumentResponseEntity;
-import com.loan_org.document_service.document.dto.DocumentUpdateResponse;
-import com.loan_org.document_service.document.dto.DownloadDocumentOutput;
+import com.loan_org.document_service.document.dto.fetch.DocumentResponseEntity;
+import com.loan_org.document_service.document.dto.update.DocumentUpdateResponse;
+import com.loan_org.document_service.document.dto.download.DownloadDocumentOutput;
 import com.loan_org.document_service.document.dto.upload.UploadDocumentOutput;
 import com.loan_org.document_service.document.dto.upload.UploadDocumentCommand;
 import com.loan_org.document_service.document.exception.IllegalStateTransitionException;
@@ -14,6 +14,7 @@ import com.loan_org.document_service.document.port.DocumentScanner;
 import com.loan_org.document_service.document.port.DocumentStorageService;
 import com.loan_org.document_service.document.exception.DocumentNotFoundException;
 import com.loan_org.document_service.document.port.StorageKeyResolver;
+import com.loan_org.document_service.document.service.DocumentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -33,6 +33,8 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentStorageService  storageService;
     private final StorageKeyResolver      namingHelper;
     private final DocumentScanner         documentScanner;
+
+    private static final String STORAGE_KEY = "storageKey";
 
     // Downloadable options
     private final List<DocumentStatus> documentAvailableForDownload = List.of(
@@ -94,7 +96,7 @@ public class DocumentServiceImpl implements DocumentService {
 
         // Search in MongoDB, or else throw exception
         DocumentMetadata metadata = documentRepository.findByStorageKey(storageKey)
-                .orElseThrow(() -> new DocumentNotFoundException("storageKey", storageKey));
+                .orElseThrow(() -> new DocumentNotFoundException(STORAGE_KEY, storageKey));
 
         log.info("[DOCUMENT_SERVICE][CONFIRM] Fetched document metadata successfully. Now confirming the upload...");
 
@@ -121,7 +123,7 @@ public class DocumentServiceImpl implements DocumentService {
         // Fetch document
         return mapToResponseEntity(
                 documentRepository.findByStorageKey(storageKey)
-                        .orElseThrow(() -> new DocumentNotFoundException("storageKey", storageKey))
+                        .orElseThrow(() -> new DocumentNotFoundException(STORAGE_KEY, storageKey))
         );
     }
 
@@ -169,7 +171,7 @@ public class DocumentServiceImpl implements DocumentService {
 
         // Fetch metadata record from MongoDB
         DocumentMetadata metadata = documentRepository.findByStorageKey(storageKey)
-                .orElseThrow(() -> new DocumentNotFoundException("storageKey", storageKey));
+                .orElseThrow(() -> new DocumentNotFoundException(STORAGE_KEY, storageKey));
         log.info("[DOCUMENT_SERVICE][DOWNLOAD] Found the record in database. Checking if document is uploaded or not...");
 
         // State-Guard: Block link generation if the file bytes aren't verified yet
@@ -202,7 +204,7 @@ public class DocumentServiceImpl implements DocumentService {
                 storageKey);
 
         DocumentMetadata documentMetadata = documentRepository.findByStorageKey(storageKey)
-                .orElseThrow(() -> new DocumentNotFoundException("storageKey", storageKey));
+                .orElseThrow(() -> new DocumentNotFoundException(STORAGE_KEY, storageKey));
         log.info("[DOCUMENT_SERVICE][DELETE] Found record in database. Deleting the record now...");
 
         // Soft-delete the document (mark as archived)
