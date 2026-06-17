@@ -34,6 +34,8 @@ filter:
     correlation:
       header: X-Correlation-Id
       key: correlationId
+  jwt:
+    signing_key: ${JWT_SIGNING_KEY}
 
 clamav:
   host: ${CLAMAV_HOST}
@@ -54,9 +56,6 @@ aws:
     validity_in_minutes: ${MINIO_DOWNLOAD_VALIDITY_IN_MINUTES}
   webhook:
     secret-token: ${MINIO_SECRET_TOKEN}
-
-jwt:
-  signing_key: ${JWT_SIGNING_KEY}
 
 eureka:
   client:
