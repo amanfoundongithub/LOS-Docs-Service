@@ -1,7 +1,7 @@
 package com.loan_org.document_service.infrastructure.messaging.rabbitmq;
 
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,8 +23,8 @@ public class RabbitMQConfig {
 
     // ─── INFRASTRUCTURE CONVERTERS ───
     @Bean
-    public Jackson2JsonMessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+    public JacksonJsonMessageConverter jsonMessageConverter() {
+        return new JacksonJsonMessageConverter();
     }
 
     // ─── CORE EXCHANGE BEANS ───

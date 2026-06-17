@@ -7,9 +7,6 @@ spring:
 
   data:
     mongodb:
-      host: ${MONGODB_HOST}
-      port: ${MONGODB_PORT}
-      database: ${MONGODB_DATABASE_NAME}
       auto-index-creation: true
 
   rabbitmq:
@@ -21,9 +18,22 @@ spring:
       simple:
         retry:
           enabled: false
+  mongodb:
+    database: ${MONGODB_DATABASE_NAME}
+    host: ${MONGODB_HOST}
+    port: ${MONGODB_PORT}
 
 server:
   port: 5800
+
+filter:
+  mdc:
+    trace:
+      header: X-Trace-Id
+      key: traceId
+    correlation:
+      header: X-Correlation-Id
+      key: correlationId
 
 clamav:
   host: ${CLAMAV_HOST}
