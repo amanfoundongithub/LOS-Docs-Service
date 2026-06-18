@@ -30,7 +30,7 @@ public class PermissionGuardImpl implements PermissionGuard {
 
     @Override
     public void canUserView(Map<String, Object> attributes, String endpoint) {
-        if(attributes.get("document:view") == null) {
+        if(attributes.get("document:download") == null) {
             throw new PermissionDeniedException(endpoint,
                     "The user does not have the permission to view document(s). Check your permission or contact administrator");
         }
