@@ -13,7 +13,7 @@ import java.time.Instant;
  */
 @Builder
 public record DownloadDocumentOutput(
-        String downloadUrl,
-        int validForMinutes,
+        String  downloadUrl,
+        int     validForMinutes,
         Instant createdTimestamp
 ) {}
