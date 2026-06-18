@@ -1,6 +1,6 @@
 package com.loan_org.document_service.document.dto.upload;
 
-import com.loan_org.document_service.document.constraints.ValidationConstants;
+import com.loan_org.document_service.document.constraints.DocumentValidationRules;
 import com.loan_org.document_service.document.constraints.decorator.ValidateContentType;
 import com.loan_org.document_service.document.model.DocumentType;
 import com.loan_org.document_service.infrastructure.web.dto.upload.DocumentUploadHttpRequest;
@@ -29,23 +29,23 @@ import jakarta.validation.constraints.NotNull;
  */
 public record UploadDocumentCommand(
 
-        @NotBlank(message = ValidationConstants.APPLICATION_ID_NOT_BLANK_MESSAGE)
+        @NotBlank(message = DocumentValidationRules.APPLICATION_ID_NOT_BLANK_MESSAGE)
         String       applicationId,
 
-        @NotBlank(message = ValidationConstants.CUSTOMER_ID_NOT_BLANK_MESSAGE)
+        @NotBlank(message = DocumentValidationRules.CUSTOMER_ID_NOT_BLANK_MESSAGE)
         String       customerId,
 
-        @NotNull(message = ValidationConstants.DOCUMENT_TYPE_NOT_BLANK_MESSAGE)
+        @NotNull(message = DocumentValidationRules.DOCUMENT_TYPE_NOT_BLANK_MESSAGE)
         DocumentType documentType,
 
-        @NotBlank(message = ValidationConstants.CONTENT_TYPE_NOT_BLANK_MESSAGE)
-        @ValidateContentType(message = ValidationConstants.CONTENT_TYPE_NOT_VALID_MESSAGE)
+        @NotBlank(message = DocumentValidationRules.CONTENT_TYPE_NOT_BLANK_MESSAGE)
+        @ValidateContentType(message = DocumentValidationRules.CONTENT_TYPE_NOT_VALID_MESSAGE)
         String       contentType,
 
-        @NotBlank(message = ValidationConstants.FILE_NAME_NOT_BLANK_MESSAGE)
+        @NotBlank(message = DocumentValidationRules.FILE_NAME_NOT_BLANK_MESSAGE)
         String       fileName,
 
-        @Min(value = ValidationConstants.MIN_FILE_SIZE_IN_BYTES,
-                message = ValidationConstants.FILE_MINIMUM_SIZE_MESSAGE)
+        @Min(value = DocumentValidationRules.MIN_FILE_SIZE_IN_BYTES,
+                message = DocumentValidationRules.FILE_MINIMUM_SIZE_MESSAGE)
         long         fileSize
 ) {}
